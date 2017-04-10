@@ -1,11 +1,20 @@
-from symbol    import Symbol
-from charstore import CharStorage
+from symbol     import Symbol
+from countstore import CountStorage
 
 class SymbolStorage(dict):
     def __init__(self):
         super().__init__()
-        self.charstore = CharStorage()
+
+        self.substorages = {
+                'kind'       : CountStorage(),
+                'char'       : CountStorage(),
+                'origin'     : CountStorage(),
+                'components' : CountStorage()
+                    }
         self.undefined = []
+
+    def _sub(self, storename):
+        return self.substorages[storename]
 
     def add(self, *args, **kwargs):
         if len(args) == 1 and len(kwargs) == 0:
@@ -23,8 +32,16 @@ class SymbolStorage(dict):
             if name not in self:
                 pending.append(name)
             else:
+                sym = self[name]
                 for char in self.chars_of(name):
-                    self.charstore.add(name, char)
+                    self._sub('char').add(name, char)
+                for component in sym.components:
+                    self._sub('components').add(name, component.name)
+                if sym.origin is not None:
+                    self._sub('origin').add(name, sym.origin)
+                if sym.kind is not None:
+                    self._sub('kind').add(name, sym.origin)
+
         self.undefined = pending
 
     def chars_of(self, name):
@@ -47,6 +64,6 @@ class SymbolStorage(dict):
             chars += self.chars_of(sym.kind)
         return chars
 
-    def find_by_chars(self, chars):
-        print('%s best matched the characteristics %s' % (self.charstore.find(chars), chars))
+    def find_by(self, items, storename):
+        print('%s best matched the %s items %s' % (self._sub(storename).find(items), storename, items))
 

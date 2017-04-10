@@ -26,17 +26,22 @@ def syllogism():
     if 'mortal' in symstore.chars_of('Socrates'):
         print('Solved Plato\'s basic syllogism')
 
-def find_by_chars():
+def find_by():
     symstore = SymbolStorage()
     symstore.add('firetruck', None, 'vehicle', [Atom('body', ['rectangular', 'red', 'metal']),
                                                 Atom('tires', ['black', 'circular'])], [])
     symstore.add('apple', 'tree', 'fruit', [Atom('body', ['round', 'red', 'green', 'sweet', 'tart']),
                                             Atom('stem', ['brown', 'short'])], [])
-    symstore.find_by_chars(['red', 'sweet'])
-    symstore.find_by_chars(['red', 'rectangular'])
-    symstore.find_by_chars(['red'])
+
+    symstore.find_by(['red', 'sweet'], 'char')
+    symstore.find_by(['red', 'rectangular'], 'char')
+    symstore.find_by(['red'], 'char')
+
+    symstore.find_by(['body', 'tires'], 'components')
+    symstore.find_by(['tree'], 'origin')
 
 if __name__ == '__main__':
     syllogism()
-    find_by_chars()
+    find_by()
+
 

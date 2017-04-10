@@ -1,16 +1,16 @@
 from collections import Counter
 
-class CharStorage(dict):
-    def add(self, symname, char):
-        if char in self:
-            self[char].append(symname)
+class CountStorage(dict):
+    def add(self, symname, key):
+        if key in self:
+            self[key].append(symname)
         else:
-            self[char] = [symname]
+            self[key] = [symname]
 
-    def find(self, chars):
-        assert len(chars) > 0
+    def find(self, keys):
+        assert len(keys) > 0
         c = Counter()
-        for char in chars:
+        for char in keys:
             c.update(self[char])
 
         common = c.most_common()

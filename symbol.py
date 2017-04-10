@@ -15,7 +15,7 @@ General:
 
     Object:
         origin:          [names]
-        kind:           [names]
+        kind:            [names]
         components:      [Objects]
         characteristics: [adjectives]
 
