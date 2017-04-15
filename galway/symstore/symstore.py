@@ -1,5 +1,5 @@
-from symbol     import Symbol
-from countstore import CountStorage
+from .symbol     import Symbol, Atom
+from .countstore import CountStorage
 
 class SymbolStorage(dict):
     def __init__(self):

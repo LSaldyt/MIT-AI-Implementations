@@ -1,21 +1,4 @@
-#!/usr/bin/env python3
-from symbol   import Symbol, Atom
-from symstore import SymbolStorage
-
-'''
-Apple:
-    origin: tree
-    is: fruit
-    has:
-        body: round, red, green, apple-taste (sweet, tart)
-        stem: brown, short
-
-Object:
-    origin: 
-    class:
-    characteristics:
-
-'''
+from .symstore import Symbol, SymbolStorage, Atom
 
 def syllogism():
     # Solving syllogisms in a few lines:
@@ -24,7 +7,7 @@ def syllogism():
     symstore.add('Socrates', kind='man')
 
     if 'mortal' in symstore.chars_of('Socrates'):
-        print('Solved Plato\'s basic syllogism')
+        return True
 
 def find_by():
     symstore = SymbolStorage()
@@ -40,8 +23,6 @@ def find_by():
     symstore.find_by(['body', 'tires'], 'components')
     symstore.find_by(['tree'], 'origin')
 
-if __name__ == '__main__':
+def demo():
     syllogism()
     find_by()
-
-
