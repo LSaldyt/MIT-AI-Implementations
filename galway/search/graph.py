@@ -13,7 +13,7 @@ class Graph(object):
         self.height = height
         self.width  = width
         self.obstructions = obstructions
-        self.points = {(x, y): self.get_adjacent((x, y)) for x in range(width) for y in range(height)}
+        self.points = {(x, y) : self.get_adjacent((x, y)) for x in range(width) for y in range(height)}
 
     def get_adjacent(self, point):
         (x, y) = point
