@@ -1,4 +1,4 @@
-from node import Node, score 
+from .node import Node, score 
 
 inf = float('inf')
 
@@ -24,7 +24,7 @@ def mini_max(node, branches, maximizing=True, depth=1):
             result = r
     return v, [node] + result
 
-def alphabeta(node, branches, maximizing=True, depth=1, alpha=-inf, beta=inf):
+def alpha_beta(node, branches, maximizing=True, depth=1, alpha=-inf, beta=inf):
     if depth == 0:
         return score(node), [node] 
     else:
@@ -38,7 +38,7 @@ def alphabeta(node, branches, maximizing=True, depth=1, alpha=-inf, beta=inf):
 
         result = None
         for branch in branches(node):
-            s, r = alphabeta(branch, branches, not maximizing, depth - 1, alpha, beta)
+            s, r = alpha_beta(branch, branches, not maximizing, depth - 1, alpha, beta)
             if comp(v, s) == s:
                 v = s
                 result = r
