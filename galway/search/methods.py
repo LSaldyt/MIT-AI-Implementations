@@ -46,22 +46,22 @@ def breadth_first_2(branches, start, end):
     else:
         return []
 
-distance = lambda current, end : sqrt((end[0] - current[0]) ** 2 + (end[1] - current[1]) ** 2)
+point_distance = lambda current, end : sqrt((end[0] - current[0]) ** 2 + (end[1] - current[1]) ** 2)
 
-def hill_climbing(branches, seen, current, end):
+def hill_climbing(branches, seen, current, end, distance=point_distance):
     if end in branches(current):
         return (True, seen + [end])
     else:
         possible = sorted([point for point in branches(current) if point not in seen],
                         key=lambda p : distance(p, end))
         for next_point in possible:
-            result = hill_climbing(branches, seen +[next_point], next_point, end)
+            result = hill_climbing(branches, seen +[next_point], next_point, end, distance=distance)
             if(result[0]):
                 return (True, result[1])
         return (False, [])
 
 
-def beam_search(branches, start, end, width=2):
+def beam_search(branches, start, end, width=2, distance=point_distance):
     if start == end:
          return [end]
     seen    = []
@@ -96,7 +96,7 @@ def branch_and_bound(branches, start, end):
 
     return paths[end][1]
 
-def astar(branches, start, end):
+def astar(branches, start, end, distance=point_distance):
     paths = { start : (0, [start])}
 
     pathTo    = lambda key   : paths[key][1]

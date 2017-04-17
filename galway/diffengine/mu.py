@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from ..search import branch_and_bound
+from ..search   import branch_and_bound, breadth_first, breadth_first_2, astar 
+from ..util     import timedblock
 
 def mu_branches(node):
     options = []
@@ -22,8 +23,26 @@ def gen_theorems(depth):
 
     return theorems
 
-#def astar(branches, start, end):
+def theorem_dist(a, b):
+    score = 0
+    for ca, cb in zip(min(a, b), max(a, b)):
+        if ca != cb:
+            score += 1
+    return score + abs(len(a) - len(b))
+    #return abs(a.count('I') - b.count('I')) + abs(a.count('U') - b.count('U'))
+
+def timed_theorem_search(f, iterations=1):
+    with timedblock(f.__name__):
+        for i in range(iterations):
+            result = f(mu_branches, 'MI', 'MIIIIIIIIIIIIIIII')
+    print(result)
 
 def demo():
-    print(gen_theorems(4))
-    print(branch_and_bound(mu_branches, 'MI', 'MUI'))
+    iterations = 10000
+    timed_theorem_search(breadth_first,    iterations)
+    timed_theorem_search(breadth_first_2,  iterations)
+    timed_theorem_search(branch_and_bound, iterations)
+    with timedblock('astar'):
+        for i in range(iterations):
+            result = astar(mu_branches, 'MI', 'MIIIIIIIIIIIIIIII', distance=theorem_dist)
+    print(result)
