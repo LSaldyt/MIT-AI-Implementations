@@ -1,3 +1,4 @@
+import re
 
 '''
 Objects:
@@ -40,9 +41,33 @@ def build_transformers():
 
 transformers = build_transformers()
 
+operators = ['v', '.', '⊃', '~']
+
+pattern = '(%s)' % ')|('.join(map(re.escape, operators))
+
+def subterms(formula):
+    formula_terms = []
+    items = [item for item in re.split(pattern, formula) if item is not None]
+    for i, item in enumerate(items):
+        if item not in operators:
+            formula_terms.append(item)
+            if i != len(items) - 1:
+                formula_terms.append(item + ''.join(items[i + 1:]))
+    return [term for term in formula_terms if len(term) > 0]
+
+
 def logic_branches(node):
-    options = []
+    options = set()
+    formula_terms = subterms(node)
     for a, b in transformers.items():
-        options.append(node.replace(a, b))
+        for i, term_a in enumerate(formula_terms):
+            for term_b in formula_terms:
+                a_pattern = a.replace('A', term_a).replace('B', term_b)
+                b_pattern = b.replace('A', term_a).replace('B', term_b)
+
+                next_formula = node.replace(a_pattern, b_pattern)
+                next_formula = next_formula.replace('~~', '')
+                options.add(next_formula)
+
     return options
 

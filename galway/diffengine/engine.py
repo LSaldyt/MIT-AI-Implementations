@@ -1,10 +1,11 @@
 from ..search   import branch_and_bound, breadth_first, breadth_first_2, astar 
-from ..util     import timedblock
+from ..util     import timedblock, ztest, to_p
 
 from .mu import mu_branches
-from .logic import logic_branches
+from .logic import logic_branches, subterms
 
-from pprint import pprint
+from statistics import mean
+from pprint     import pprint
 
 def produce_theorems(start, branches, depth):
     theorems = {start}
@@ -26,14 +27,37 @@ def hamming_dist(a, b):
 def levenshtein_dist(a, b, weight=1):
     return hamming_dist(a, b) + abs(len(a) - len(b)) * weight
 
+distanceDict = {
+        'levenshtein_dist' : levenshtein_dist,
+        'hamming_dist'     : hamming_dist
+        }
+
 def demo():
-    iterations = 500
+    sampleSize = 30
+
     start = 'MI'
     goal  = 'M' + ('I' * 2**10)
-    with timedblock('levenshtein dist'):
-        for i in range(iterations):
-            result = astar(mu_branches, start, goal, distance=levenshtein_dist)
-    with timedblock('hamming dist'):
-        for i in range(iterations):
-            result = astar(mu_branches, start, goal, distance=hamming_dist)
-    produce_theorems('AvB', logic_branches, 10)
+
+    timeDict = {'no_heuristic' : []}
+    for key in distanceDict:
+        timeDict[key] = []
+
+    for _ in range(sampleSize):
+        with timedblock('no_heuristic', timeDict):
+            result = branch_and_bound(mu_branches, start, goal)
+        for k, v in distanceDict.items():
+            with timedblock(k, timeDict):
+                result = astar(mu_branches, start, goal, distance=v)
+
+    u = mean(timeDict['no_heuristic'])
+    print('p-values for z test from no_heuristic mean:')
+    print('{:<20}: {:f}s'.format('no_heuristic', u))
+    for key in distanceDict:
+        print('{:<20}: {:f}s'.format(key, mean(timeDict[key])))
+    print('_' * 80)
+    for key in distanceDict:
+        z = ztest(timeDict[key], u)
+        p = to_p(z)
+        print('{:<20}: {:>5}% confidence'.format(key, p * 100))
+    #produce_theorems('AvB', logic_branches, 2)
+
