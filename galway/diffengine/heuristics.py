@@ -29,7 +29,7 @@ def hamming_len_dist(a, b):
 
 def jaro(a, b):
     l = min(len(a), len(b))
-    m = l - hamming_dist(a, b)
+    m = max(1, l - hamming_dist(a, b))
     t = transpositions(a, b)
     return 1/3 * (m /len(a) + m/len(b) + (m-t)/m)
 
