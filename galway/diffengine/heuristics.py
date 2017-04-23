@@ -10,6 +10,13 @@ def transpositions(a, b):
             n += 1
     return n
 
+def len_dist(a, b):
+    if a == b:
+        return 0
+    n = abs(len(a) - len(b)) 
+    if n == 0: return 1 
+    else: return n
+
 def hamming_dist(a, b):
     score = 0
     for ca, cb in zip(min(a, b), max(a, b)):
@@ -17,20 +24,39 @@ def hamming_dist(a, b):
             score += 1
     return score
 
-def hamming_len_dist(a, b, weight=1):
-    return hamming_dist(a, b) + abs(len(a) - len(b)) * weight
+def hamming_len_dist(a, b):
+    return hamming_dist(a, b) + len_dist(a, b)
 
-def hamming_len_trans_dist(a, b):
-    return hamming_len_dist(a, b) - transpositions(a, b)
-
-def hamming_trans_dist(a, b):
-    return hamming_dist(a, b) - transpositions(a, b)
-
-def jaro_dist(a, b):
+def jaro(a, b):
     l = min(len(a), len(b))
     m = l - hamming_dist(a, b)
     t = transpositions(a, b)
-    return 1 / (1/3 * (m /len(a) + m/len(b) + (m-t)/m))
+    return 1/3 * (m /len(a) + m/len(b) + (m-t)/m)
+
+def jaro_dist(a, b):
+    return 1 / jaro(a, b)
+
+def jaro_winkler(a, b):
+    d = jaro(a, b)
+
+    l = 0
+    for ca, cb in zip(min(a, b), max(a, b)):
+        if ca != cb or l > 4:
+            break
+        else:
+            l += 1
+    p = .1
+    return d + l * p * (1-d)
+
+def jaro_winkler_dist(a, b):
+    return 1 / jaro_winkler(a, b)
+
+def jaro_len_dist(a, b):
+    return jaro_dist(a, b) * len_dist(a, b) 
+
+def jaro_winkler_len_dist(a, b):
+    return jaro_winkler_dist(a, b) * len_dist(a, b) 
+
 
 
 '''

@@ -1,13 +1,14 @@
 from ..search   import branch_and_bound, breadth_first, breadth_first_2, astar 
-from ..util     import timedblock, ztest, to_p, timeout
+from ..util     import timedblock, ztest, to_p, timeout, sign
 
 from .mu import mu_branches
 from .logic import logic_branches, subterms
 
 from . import heuristics
 
-from statistics import mean
-from pprint     import pprint
+from statistics  import mean, stdev
+from pprint      import pprint
+from collections import namedtuple
 
 def produce_theorems(start, branches, depth):
     theorems = {start}
@@ -24,38 +25,51 @@ def test_heuristics():
     for f in distanceDict.values():
         assert(f('aaa', 'abc') > f('aaa', 'aaa'))
 
-def demo():
-    test_heuristics()
-    sampleSize = 30
-
-    start = 'MI'
-    goal  = 'M' + ('I' * 2**10)
-
-    timeDict = {'no_heuristic' : []}
-    for key in distanceDict:
-        timeDict[key] = []
-
-    for i in range(sampleSize):
-        print('.', end='', flush=True)
-        with timedblock('no_heuristic', timeDict):
-            result = branch_and_bound(mu_branches, start, goal)
-        for k, v in distanceDict.items():
-            with timeout(1):
-                with timedblock(k, timeDict):
-                    result = astar(mu_branches, start, goal, distance=v)
-
+def show_results(timeDict):
     print('')
     keys = sorted(distanceDict.keys())
     u = mean(timeDict['no_heuristic'])
     print('p-values for z test from no_heuristic mean:')
     print('_' * 80)
-    print('{:<28}| {:f}s'.format('no_heuristic', u))
+    print('{:<28}| {:+f}s | sdev {:+f}'.format('no_heuristic', u, stdev(timeDict['no_heuristic'])))
     for key in keys:
-        print('{:<28}| {:f}s'.format(key, mean(timeDict[key])))
+        m = mean(timeDict[key])
+        print('{:<28}| {:+f}s | {:+f}s | sdev {:+f}'.format(key, m, m - u, stdev(timeDict[key])))
     print('_' * 80)
     for key in keys:
         z = ztest(timeDict[key], u)
         p = to_p(z)
-        print('{:<28}| {:>5}% confidence'.format(key, p * 100))
+        print('{:<28}| {} | {:<10}%'.format(key, sign(z), round(p * 100, 4)))
+
+def run_tests(timeDict, sampleSize, start, goal, branches, maxTime=1):
+    for i in range(sampleSize):
+        print('.', end='', flush=True)
+        with timeout(maxTime):
+            with timedblock('no_heuristic', timeDict):
+                result = branch_and_bound(branches, start, goal)
+        for k, v in distanceDict.items():
+            with timeout(maxTime):
+                with timedblock(k, timeDict):
+                    result = astar(branches, start, goal, distance=v)
+
+Theorem = namedtuple('Theorem', ['start', 'goal', 'branches'])
+
+def demo():
+    test_heuristics()
+    sampleSize = 100
+
+    theorems = [Theorem('MI', 'M' + 'I' * 2**8,  mu_branches),
+                Theorem('MI', 'M' + 'IU' * 2**8, mu_branches),
+                Theorem('MI', 'MIIUIIU',         mu_branches)]
+
+    for theorem in theorems:
+        print('')
+        print('{} to {}'.format(theorem.start, theorem.goal))
+        print('')
+        timeDict = {'no_heuristic' : []}
+        for key in distanceDict:
+            timeDict[key] = []
+        run_tests(timeDict, sampleSize, theorem.start, theorem.goal, theorem.branches, maxTime=1)
+        show_results(timeDict)
     #produce_theorems('AvB', logic_branches, 2)
 
