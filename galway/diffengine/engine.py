@@ -2,7 +2,7 @@ from ..search   import branch_and_bound, breadth_first, breadth_first_2, astar
 from ..util     import timedblock, ztest, to_p, timeout, sign
 
 from .mu import mu_branches
-from .logic import logic_branches, subterms
+from .logic import logic_branches, subterms 
 
 from . import heuristics
 
@@ -17,13 +17,18 @@ def produce_theorems(start, branches, depth):
         for t in theorems:
             new_theorems.update(set(branches(t)))
         theorems.update(new_theorems)
-    pprint(theorems)
+    for t in theorems:
+        if isinstance(t, tuple):
+            print(t[-1])
+        else:
+            print(t)
 
 distanceDict = { name : f for name, f in heuristics.__dict__.items() if callable(f) and name.endswith('dist')}
 
 def test_heuristics():
     for f in distanceDict.values():
         assert(f('aaa', 'abc') > f('aaa', 'aaa'))
+        f('', '')
 
 def show_results(timeDict):
     print('')
@@ -55,21 +60,26 @@ def run_tests(timeDict, sampleSize, start, goal, branches, maxTime=1):
 Theorem = namedtuple('Theorem', ['start', 'goal', 'branches'])
 
 def demo():
+    produce_theorems(('R.(~P⊃Q)',), logic_branches, 4)
+    1/0
     test_heuristics()
-    sampleSize = 100
+    sampleSize = 30
 
     theorems = [Theorem('MI', 'M' + 'I' * 2**8,  mu_branches),
                 Theorem('MI', 'M' + 'IU' * 2**8, mu_branches),
                 Theorem('MI', 'MIIUIIU',         mu_branches)]
+    #,Theorem(('AvB',), ('~(~A.~B)',), logic_branches)]
 
-    for theorem in theorems:
-        print('')
-        print('{} to {}'.format(theorem.start, theorem.goal))
-        print('')
-        timeDict = {'no_heuristic' : []}
-        for key in distanceDict:
-            timeDict[key] = []
-        run_tests(timeDict, sampleSize, theorem.start, theorem.goal, theorem.branches, maxTime=1)
-        show_results(timeDict)
-    #produce_theorems('AvB', logic_branches, 2)
+    with timedblock('demo'):
+        for theorem in theorems:
+            print('')
+            print('{} to {}'.format(theorem.start, theorem.goal))
+            print('')
+            timeDict = {'no_heuristic' : []}
+            for key in distanceDict:
+                timeDict[key] = []
+            run_tests(timeDict, sampleSize, theorem.start, theorem.goal, theorem.branches, maxTime=1)
+            show_results(timeDict)
+        print('\n\n')
+
 

@@ -16,4 +16,4 @@ def timedblock(label, saveDict=None):
             else:
                 saveDict[label] = t
         else:
-            print('{:20} : {}'.format(label, t))
+            print('{} : {}'.format(label, t))
