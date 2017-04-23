@@ -1,2 +1,3 @@
-from .util import *
-from .ztest import ztest, to_p
+from .util    import *
+from .ztest   import ztest, to_p
+from .timeout import timeout
