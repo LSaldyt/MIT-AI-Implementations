@@ -1,0 +1,95 @@
+\documentclass{article}
+
+\usepackage{indentfirst}
+\usepackage{setspace}
+\doublespacing
+
+% ================================================================================= 
+% Package for showing source code
+% ================================================================================= 
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+language=C,
+aboveskip=.5mm,
+belowskip=.5mm,
+showstringspaces=false,
+columns=flexible,
+basicstyle={\scriptsize\ttfamily},
+numbers=none,
+numberstyle=\tiny\color{gray},
+keywordstyle=\color{blue},
+commentstyle=\color{dkgreen},
+stringstyle=\color{mauve},
+breaklines=false,
+breakatwhitespace=true,
+tabsize=3
+}
+
+% ================================================================================= 
+% Package for flowcharts/diagrams
+% ================================================================================= 
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{io}        = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=blue!30]
+\tikzstyle{process}   = [diamond, minimum width=2cm, minimum height=0cm, text centered, draw=black, fill=orange!30]
+\tikzstyle{arrow}     = [thick,->,>=stealth]
+
+% ==================================================
+% Paper
+% ==================================================
+
+\title{Difference Engine Theorem Searching Heuristics}
+\date{01-26-2017}
+\author{Lucas Saldyt}
+
+\begin{document}
+
+\maketitle
+\pagenumbering{gobble}
+\newpage
+\pagenumbering{arabic}
+
+% ==================================================
+\section{Abstract}
+% ==================================================
+
+    This paper investigates the efficacy of different search heuristics in a theorem searching program. 
+The program is modeled after a difference engine (Also known as a General Problem Solver).
+This implementation produces a graph of possible derivable theorems, and searches the graph with a pathfinding algorithm (A*). 
+A* takes a heuristic, which is a function that measures the difference between two theorems.
+This report will run A* with several different hueristics, and benchmark each against the branch-and-bound search algorithm, which is a version of A* that uses no heuristic. 
+
+% ==================================================
+\section{Introduction}
+% ==================================================
+
+
+
+% ==================================================
+\section{Methods}
+% ==================================================
+
+To benchmark each heuristic, an axiom and derivable theorem are chosen, then, the difference engine is run with the heuristic 1000 times. 
+Then, since the sample size is above 30, a z-test is performed, and a p-value calculated to find if the heuristic is significantly faster than a search with no heuristic.
+% ==================================================
+\section{Applications}
+% ==================================================
+% ==================================================
+\section{Results}
+% ==================================================
+% ==================================================
+\section{Conclusion}
+% ==================================================
+% ==================================================
+\section{Appendix}
+% ==================================================
