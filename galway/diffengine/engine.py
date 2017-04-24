@@ -17,11 +17,14 @@ def produce_theorems(start, branches, depth):
         for t in theorems:
             new_theorems.update(set(branches(t)))
         theorems.update(new_theorems)
+
+    to_show = set()
     for t in theorems:
         if isinstance(t, tuple):
-            print(t[-1])
+            to_show.add(t[-1])
         else:
-            print(t)
+            to_show.add(t)
+    pprint(to_show)
 
 distanceDict = { name : f for name, f in heuristics.__dict__.items() if callable(f) and name.endswith('dist')}
 
@@ -60,8 +63,7 @@ def run_tests(timeDict, sampleSize, start, goal, branches, maxTime=1):
 Theorem = namedtuple('Theorem', ['start', 'goal', 'branches'])
 
 def demo():
-    produce_theorems(('R.(~P⊃Q)',), logic_branches, 4)
-    1/0
+    produce_theorems(('R.(~P⊃Q)',), logic_branches, 3)
     test_heuristics()
     sampleSize = 30
 

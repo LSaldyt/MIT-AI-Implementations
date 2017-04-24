@@ -11,12 +11,12 @@ Objects:
 
 Operators:
 '''
-replacements = '''
-    AvB             -> BvA
-    A.B             -> B.A
+strReplacements = '''
+    AvB            <-> BvA
+    A.B            <-> B.A
     A⊃B             -> ~B⊃~A
-    AvA            <-> A
-    A.A            <-> A
+    AvA             -> A
+    A.A             -> A
     Av(BvC)        <-> (AvB)vC
     A.(B.C)        <-> (A.B).C
     AvB            <-> ~(~A.~B)
@@ -34,11 +34,11 @@ advanced = '''
 ''' 
 
 def build_transformers():
-    transformers = dict()
-    for line in replacements.split('\n'):
+    transformers = [] 
+    for line in strReplacements.split('\n'):
         terms = line.split()
         if len(terms) > 0:
-            transformers[terms[0]] = terms[2]
+            transformers.append((terms[0], terms[2], terms[1] == '<->'))
     return transformers
 
 transformers = build_transformers()
@@ -54,10 +54,10 @@ def split_implications(formula):
         if item is not None and item != '':
             yield item
 
-def split_operators(formula, discard):
+def split_operators(formula):
     for item in re.split(split_ops, formula):
         if item is not None and item != '':
-            if not discard or item not in operators:
+            if item not in operators and item != '~':
                 yield item
 
 def strip_parens(term):
@@ -90,13 +90,13 @@ def subterms(formula, impsonly=False):
                 for token in split_implications(item):
                     terms.append(token)
             else:
-                for token in split_operators(item, True):
+                for token in split_operators(item):
                     terms.append(token)
     return terms
 
 def extensions(node):
     options = set()
-    for char in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+    for char in 'DEFGHIJKLMNOPQRSTUVWXYZ':
         if char not in node:
             if len(node) > 1:
                 options.add('(' + node + ')v' + char)
@@ -107,16 +107,21 @@ def extensions(node):
 
 def replacements(node):
     options = set()
+    def add_theorem(l_pattern, r_pattern):
+        next_formula = node.replace(l_pattern, r_pattern)
+        next_formula = next_formula.replace('~~', '')
+        options.add(next_formula)
     formula_terms = subterms(node)
-    for a, b in transformers.items():
-        for i, term_a in enumerate(formula_terms):
-            for term_b in formula_terms:
-                a_pattern = a.replace('A', term_a).replace('B', term_b)
-                b_pattern = b.replace('A', term_a).replace('B', term_b)
+    for term_a in formula_terms:
+        for term_b in formula_terms:
+            for term_c in formula_terms:
+                for left, right, inverse in transformers:
+                    l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+                    r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
 
-                next_formula = node.replace(a_pattern, b_pattern)
-                next_formula = next_formula.replace('~~', '')
-                options.add(next_formula)
+                    add_theorem(l_pattern, r_pattern)
+                    if inverse:
+                        add_theorem(r_pattern, l_pattern)
     return options
 
 
@@ -127,12 +132,6 @@ def deductions(theorems):
             if i != j:
                 options.add(a + '.' + b)
     return options
-
-advanced = '''
-    [A ⊃ B, A]      -> B
-    [A ⊃ B, B ⊃ C]  -> A ⊃ C
-''' 
-
 
 def get_implications(t):
     implications = dict()
@@ -153,16 +152,16 @@ def advanced_deductions(theorems):
         implications.update(get_implications(t))
     for a, b in implications.items():
         if a in theorems:
-            options.append(b)
+            options.add(b)
         if b in implications:
-            options.append(a + '⊃' + implications[b]) # A -> B, B -> C, therefore, A -> C 
+            options.add(a + '⊃' + implications[b]) # A -> B, B -> C, therefore, A -> C 
     return options
 
 def logic_branches(theorems):
     options = set()
 
     for theorem in theorems:
-        for t in extensions(theorem) | replacements(theorem):
+        for t in replacements(theorem):#extensions(theorem) | replacements(theorem):
             if t not in theorems:
                 options.add(theorems + (t,))
     for t in deductions(theorems) | advanced_deductions(theorems):
