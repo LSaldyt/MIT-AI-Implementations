@@ -60,17 +60,17 @@ def run_tests(timeDict, sampleSize, start, goal, branches, maxTime=1):
                 with timedblock(k, timeDict):
                     result = astar(branches, start, goal, distance=v)
 
-Theorem = namedtuple('Theorem', ['start', 'goal', 'branches'])
+Problem = namedtuple('Problem', ['start', 'goal', 'branches'])
 
 def demo():
-    produce_theorems(('R.(~P⊃Q)',), logic_branches, 3)
+    #produce_theorems('R.(~P⊃Q)', logic_branches, 3)
     test_heuristics()
     sampleSize = 30
 
-    theorems = [Theorem('MI', 'M' + 'I' * 2**8,  mu_branches),
-                Theorem('MI', 'M' + 'IU' * 2**8, mu_branches),
-                Theorem('MI', 'MIIUIIU',         mu_branches)]
-    #,Theorem(('AvB',), ('~(~A.~B)',), logic_branches)]
+    theorems = [Problem('MI', 'M' + 'I' * 2**8,  mu_branches),
+                Problem('MI', 'M' + 'IU' * 2**8, mu_branches),
+                Problem('MI', 'MIIUIIU',         mu_branches),
+                Problem('R.(~P⊃Q)', '(QvP).R', logic_branches)]
 
     with timedblock('demo'):
         for theorem in theorems:

@@ -157,15 +157,14 @@ def advanced_deductions(theorems):
             options.add(a + '⊃' + implications[b]) # A -> B, B -> C, therefore, A -> C 
     return options
 
-def logic_branches(theorems):
+def logic_branches(theorem):
     options = set()
-
-    for theorem in theorems:
-        for t in replacements(theorem):#extensions(theorem) | replacements(theorem):
-            if t not in theorems:
-                options.add(theorems + (t,))
-    for t in deductions(theorems) | advanced_deductions(theorems):
-        if t not in theorems:
-            options.add(theorems + (t,))
+    for t in replacements(theorem):#extensions(theorem) | replacements(theorem):
+        options.add(t)
+        #if t not in theorems:
+        #    options.add(theorems + (t,))
+    #for t in deductions(theorems) | advanced_deductions(theorems):
+    #    if t not in theorems:
+    #        options.add(theorems + (t,))
     return options
 
