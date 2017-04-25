@@ -49,7 +49,7 @@ tabsize=3
 % ==================================================
 
 \title{Difference Engine Theorem Searching Heuristics}
-\date{01-26-2017}
+\date{04-24-2017}
 \author{Lucas Saldyt}
 
 \begin{document}
@@ -62,17 +62,27 @@ tabsize=3
 % ==================================================
 \section{Abstract}
 % ==================================================
-% ==================================================
 
     This paper investigates the efficacy of different search heuristics in a theorem searching program. 
-The program is modeled after a difference engine (Also known as a General Problem Solver).
-This implementation produces a graph of possible derivable theorems, and searches the graph with a pathfinding algorithm (A*). 
+The program is modeled after a difference engine (Also known as a General Problem Solver)\cite{gps}. 
+This implementation produces a graph of possible derivable theorems, and searches the graph with a pathfinding algorithm (A*) \cite{astar}. 
 A* takes a heuristic, which is a function that measures the difference between two theorems.
 This report will run A* with several different hueristics, and benchmark each against the branch-and-bound search algorithm, which is a version of A* that uses no heuristic. 
+However, a theorem's effectiveness depends on the formal system that theorems are being proved in.
+For example, comparing the length of two theorems is more important for the MU system, where theorems often differ greatly in length.
+However, in formal typographical logic, theorems are often similar lengths, and a more specialized string metric is usually faster at classification.
 
 % ==================================================
 \section{Introduction}
 % ==================================================
+
+    To prove theorems in a formal system by using a difference engine, an informative heuristic must be designed.
+If a heuristic is inaccurate, the theorem may never be proven, or may take an extraordinary amount of time to prove.
+In the same way, a human proving theorems must also have an adequate way of measuring their progress.
+A heuristic is adequate if it can be used to create a proof in a finite amount of time. 
+In addition, this report imposes a time limit, since some heuristics will eventually reach a solution, but in untestable time.
+If a path to a theorem cannot be found using a heuristic in this amount of time, the algorithm times out and the next heuristic is tested.
+This report tests heuristics in two formal systems, with the goal of finding which heuristic is accurate at classifying each system.
 
 % ==================================================
 \section{Methods}
@@ -81,16 +91,84 @@ This report will run A* with several different hueristics, and benchmark each ag
 To benchmark each heuristic, an axiom and derivable theorem are chosen, then, the difference engine is run with the heuristic 1000 times. 
 Then, since the sample size is above 30, a z-test is performed, and a p-value calculated to find if the heuristic is significantly faster than a search with no heuristic.
 
-\section{Applications}
-% ==================================================
+The formal systems tested were:
+
+\begin{enumerate}
+    \item MU
+
+        Starting from MI, derive M followed by 2**8 "IU"s
+    \item Formal Logic
+
+        Starting from $R.(\neg P \subset Q)$, derive $(QvP).R$
+\end{enumerate}
+
+The heuristics tested were:
+\begin{enumerate}
+    \item hamming distance
+    \item hamming length distance
+    \item jaro distance
+    \item jaro length distance
+    \item jaro winkler distance
+    \item jaro winkler length distance
+    \item length distance
+    \item theorem distance
+\end{enumerate}
+
 % ==================================================
 \section{Results}
 % ==================================================
+
+For the MU system, the fastest heuristic is hamming\_len\_dist, which was .0001 seconds faster than jaro\_len\_dist, the second fastest heuristic.
+By z-test, hamming\_len\_dist is significantly faster than when no heuristic is used. 
+For reference, the worst heuristic is the theorem\_dist, which was the heuristic specifically designed for classifying formal logic theorems.
+
+For Formal Logic, the fastest heuristic was again hamming\_len\_dist, which was again .0001 seconds faster than jaro\_dist.
+By z-test, hamming\_len\_dist is significantly faster than when no heuristic is used. 
+The slowest heuristic was len\_dist. 
+
 % ==================================================
-\section{Conclusion}
+\section{Discussion}
 % ==================================================
+
+Of all of the heuristics, hamming distance is one of the easiest to calculate (it is O(n)).
+Difference in string length can actually be computed in constant time, as python strings cache their lengths upon creation or modification.
+So, hamming\_len\_dist is most likely the best heuristic because of its low computational complexity, and ability to classify theorems in both the MU system and the formal logic system.
+
+Other variants on string distance are effective at classification, with some restrictions.
+In the MU system, any string metric that did not use length as a classification failed.
+In formal logic, any string metric that did not account for differing variables failed.
+
+The specialized string distance for the formal logic system was less effective than hamming\_len\_dist, because it is more computationally complex.
+Also, it does not attempt to classify regroupings.
+
+A specialized heuristic that was computationally simple would likely run faster than hamming\_len\_dist.
+Also, if number of steps was the dependent variable, instead of time, a specialized heuristic might find the correct proof in a shorter number of steps, but a longer amount of time. 
+(Think of a student who jumps into the problem immediately, and takes some wrong paths, as compared to a student who does the problem cautiously, with every step in the right direction. 
+The first student might find the answer first, but the second will find the answer without investigating wrong answers)
+
+To take full advantage of theorem solving capabilities and heuristics, this report should more closely model a Difference Engine.
+Each heuristic should be associated with transformations in the formal system, which reduce the difference between theorems. 
+Then, heuristics should be ordered by importance.
+
+In addition, more heuristics should be tested. 
+There are many, many options for string distance functions, and this report only tests a select few of them.
+However, it is able to classify those that it tests, and their importance in each system being tested.
+
 % ==================================================
 \section{Appendix}
 % ==================================================
+
+\begin{thebibliography}{9}
+    \bibitem{gps}
+        A. Newell, J. C. Shaw, H. A. Simon
+        \textit{Report on a general problem-solving program}
+        The Rand corporation, Santa Monica, California, 1958
+    \bibitem{astar}
+        Stanford University
+        \textit{Introduction to A*}
+        Stanford University Press, Palo Alto, California, 2017
+\end{thebibliography}
+
+
 
 \end{document}

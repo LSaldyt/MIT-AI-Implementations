@@ -1,0 +1,81 @@
+p-values for z test from no_heuristic mean:
+(1000 iterations)
+________________________________________________________________________________
+no_heuristic                | +0.000937s | sdev +/- 0.000129
+hamming_dist                | +0.000497s | -0.000440s | sdev +/- 0.000076
+hamming_len_dist            | +0.000118s | -0.000820s | sdev +/- 0.000022
+jaro_dist                   | +0.002207s | +0.001270s | sdev +/- 0.000320
+jaro_len_dist               | +0.000218s | -0.000720s | sdev +/- 0.000035
+jaro_winkler_dist           | +0.012188s | +0.011251s | sdev +/- 0.001760
+jaro_winkler_len_dist       | +0.000256s | -0.000681s | sdev +/- 0.000042
+len_dist                    | +0.014643s | +0.013705s | sdev +/- 0.002004
+theorem_dist                | +infs | +infs | sdev +/- 0.000011
+________________________________________________________________________________
+hamming_dist                | - | 100.0     %
+hamming_len_dist            | - | 100.0     %
+jaro_dist                   | + | 0.0       %
+jaro_len_dist               | - | 100.0     %
+jaro_winkler_dist           | + | 0.0       %
+jaro_winkler_len_dist       | - | 100.0     %
+len_dist                    | + | 0.0       %
+theorem_dist                | + | 0.0       %
+
+Fastest algorithm was hamming_len_dist
+Followed by jaro_len_dist
+Difference: -0.00010029732013936153
+Worst: theorem_dist
+Difference: -0.04992415678914403
+
+R.(~P⊃Q) to (QvP).R
+
+p-values for z test from no_heuristic mean:
+(1000 iterations)
+________________________________________________________________________________
+no_heuristic                | +0.009325s | sdev +/- 0.000466
+hamming_dist                | +0.005514s | -0.003812s | sdev +/- 0.000291
+hamming_len_dist            | +0.005321s | -0.004005s | sdev +/- 0.000277
+jaro_dist                   | +0.005429s | -0.003897s | sdev +/- 0.000211
+jaro_len_dist               | +0.005454s | -0.003872s | sdev +/- 0.000187
+jaro_winkler_dist           | +0.005473s | -0.003853s | sdev +/- 0.000237
+jaro_winkler_len_dist       | +0.005503s | -0.003823s | sdev +/- 0.000202
+len_dist                    | +0.009379s | +0.000054s | sdev +/- 0.000308
+theorem_dist                | +0.005729s | -0.003596s | sdev +/- 0.000229
+________________________________________________________________________________
+hamming_dist                | - | 100.0     %
+hamming_len_dist            | - | 100.0     %
+jaro_dist                   | - | 100.0     %
+jaro_len_dist               | - | 100.0     %
+jaro_winkler_dist           | - | 100.0     %
+jaro_winkler_len_dist       | - | 100.0     %
+len_dist                    | + | 0.0       %
+theorem_dist                | - | 100.0     %
+
+Fastest algorithm was hamming_len_dist
+Followed by jaro_dist
+Difference: -0.00010805007010640088
+Worst: len_dist
+Difference: -0.004058108668963541
+
+
+
+demo : 139.0061779509997
+
+*********
+*SUMMARY*
+*********
+
+MU sys:
+
+Fastest algorithm was hamming_len_dist
+Followed by jaro_len_dist
+Difference: -0.00010029732013936153
+Worst: theorem_dist
+Difference: -0.04992415678914403
+
+Formal logic:
+
+Fastest algorithm was hamming_len_dist
+Followed by jaro_dist
+Difference: -0.00010805007010640088
+Worst: len_dist
+Difference: -0.004058108668963541
