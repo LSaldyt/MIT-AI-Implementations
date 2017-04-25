@@ -1,4 +1,5 @@
 import numpy as np
+from collections import namedtuple
 
 def transpositions(a, b):
     n = 0
@@ -58,6 +59,62 @@ def jaro_len_dist(a, b):
 
 def jaro_winkler_len_dist(a, b):
     return jaro_winkler_dist(a, b) * len_dist(a, b) 
+
+CharInfo = namedtuple('CharInfo', ['indices', 'count'])
+
+def _build_summary_dict(s):
+    d = dict()
+    for i, c in enumerate(s):
+        if c in d:
+            indices, count = d[c]
+            d[c] = CharInfo(indices + [i], count + 1)
+        else:
+            d[c] = CharInfo([i], 1)
+    return d
+
+'''
+Distance function in the spirit of the original GPS paper
+Should account for (in order of importance):
+    Difference in variable          (V)
+    Difference in num variables     (N)
+    Difference in sign              (T)
+    Difference in binary connective (C)
+    Difference in grouping          (G)
+    Difference in position          (P)
+'''
+def theorem_dist(a, b, variables=set('ABCDEFGHIJKLMNOPQRSTUV'), negation='~'):
+    a_dict = _build_summary_dict(a) # Form (item : indices, count)
+    b_dict = _build_summary_dict(b) # Form (item : indices, count)
+    V = 0
+    N = 0
+    T = 0
+    C = 0
+    I = 0 # Based on G and P
+    #G = 0 Important but currently left out
+    #P = 0
+    for c, (indices, count) in a_dict.items():
+        if c in variables:
+            if c not in b_dict:
+                V += 1
+            else:
+                N += abs(count - b_dict[c].count)
+                char_I = len(indices)
+                for i in indices:
+                    for j in b_dict[c].indices:
+                        if i == j:
+                            char_I -= 1
+                I += char_I
+        elif c == negation:
+            if c not in b_dict:
+                T += 1
+        else: # c is operator
+            for i in indices:
+                if len(b) < i + 1 or b[i] != c:
+                    C += 1
+    return V * 10000 + N * 1000 + T * 100 + C * 10 + I
+
+
+
 
 
 
