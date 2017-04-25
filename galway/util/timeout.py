@@ -7,7 +7,10 @@ class timeout:
     def handle_timeout(self, signum, frame):
         raise TimeoutError(self.error_message)
     def __enter__(self):
-        signal.signal(signal.SIGALRM, self.handle_timeout)
-        signal.alarm(self.seconds)
+        if self.seconds is not None:
+            signal.signal(signal.SIGALRM, self.handle_timeout)
+            signal.setitimer(signal.ITIMER_REAL,self.seconds)
+            #signal.alarm(self.seconds)
     def __exit__(self, type, value, traceback):
-        signal.alarm(0)
+        if self.seconds is not None:
+            signal.alarm(0)

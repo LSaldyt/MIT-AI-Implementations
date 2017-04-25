@@ -10,6 +10,8 @@ from statistics  import mean, stdev
 from pprint      import pprint
 from collections import namedtuple
 
+import time
+
 def produce_theorems(start, branches, depth):
     theorems = {start}
     for i in range(depth):
@@ -33,32 +35,45 @@ def test_heuristics():
         assert(f('aaa', 'abc') > f('aaa', 'aaa'))
         f('', '')
 
-def show_results(timeDict):
+def show_results(timeDict, maxTime=.1):
+    correct = lambda t : float('inf') if t > maxTime else t
     print('')
     keys = sorted(distanceDict.keys())
     u = mean(timeDict['no_heuristic'])
     print('p-values for z test from no_heuristic mean:')
+    print('({:d} iterations)'.format(len(timeDict['no_heuristic'])))
     print('_' * 80)
-    print('{:<28}| {:+f}s | sdev {:+f}'.format('no_heuristic', u, stdev(timeDict['no_heuristic'])))
+    print('{:<28}| {:+f}s | sdev +/- {:f}'.format('no_heuristic', u, stdev(timeDict['no_heuristic'])))
     for key in keys:
         m = mean(timeDict[key])
-        print('{:<28}| {:+f}s | {:+f}s | sdev {:+f}'.format(key, m, m - u, stdev(timeDict[key])))
+        print('{:<28}| {:+f}s | {:+f}s | sdev +/- {:f}'.format(key, correct(m), correct(m) - u, stdev(timeDict[key])))
     print('_' * 80)
     for key in keys:
         z = ztest(timeDict[key], u)
         p = to_p(z)
         print('{:<28}| {} | {:<10}%'.format(key, sign(z), round(p * 100, 4)))
+    best = sorted(keys, key=lambda k : mean(timeDict[k]))
+    print('\nFastest algorithm was {}'.format(best[0]))
+    print('Followed by {}'.format(best[1]))
+    print('Difference: {}'.format(mean(timeDict[best[0]]) - mean(timeDict[best[1]])))
+    print('Worst: {}'.format(best[-1]))
+    print('Difference: {}'.format(mean(timeDict[best[0]]) - mean(timeDict[best[-1]])))
 
 def run_tests(timeDict, sampleSize, start, goal, branches, maxTime=1):
+    startTime = time.perf_counter()
     for i in range(sampleSize):
-        print('.', end='', flush=True)
-        with timeout(maxTime):
-            with timedblock('no_heuristic', timeDict):
-                result = branch_and_bound(branches, start, goal)
+        with timedblock('no_heuristic', timeDict, maxTime):
+            result = branch_and_bound(branches, start, goal)
         for k, v in distanceDict.items():
-            with timeout(maxTime):
-                with timedblock(k, timeDict):
-                    result = astar(branches, start, goal, distance=v)
+            with timedblock(k, timeDict, maxTime):
+                result = astar(branches, start, goal, distance=v)
+        if i == 0:
+            perIter = time.perf_counter() - startTime
+            print('Time estimate for {} iterations: {}'.format(sampleSize, sampleSize * perIter))
+        print('.', end='', flush=True)
+        if (i + 1) % 10 == 0:
+            print(' ({})'.format(i + 1))
+
 
 Problem = namedtuple('Problem', ['start', 'goal', 'branches'])
 
@@ -66,22 +81,22 @@ def demo():
     #produce_theorems('R.(~P⊃Q)', logic_branches, 3)
     test_heuristics()
     sampleSize = 30
+    maxTime    = .05
 
-    theorems = [Problem('MI', 'M' + 'I' * 2**8,  mu_branches),
-                Problem('MI', 'M' + 'IU' * 2**8, mu_branches),
-                Problem('MI', 'MIIUIIU',         mu_branches),
+    problems = [Problem('MI', 'M' + 'IU' * 2**8, mu_branches),
                 Problem('R.(~P⊃Q)', '(QvP).R', logic_branches)]
+    #,Problem('(R⊃~P).(~R⊃Q)', '~(~Q.P)', logic_branches)]
 
     with timedblock('demo'):
-        for theorem in theorems:
+        for p in problems:
             print('')
-            print('{} to {}'.format(theorem.start, theorem.goal))
+            print('{} to {}'.format(p.start, p.goal))
             print('')
             timeDict = {'no_heuristic' : []}
             for key in distanceDict:
                 timeDict[key] = []
-            run_tests(timeDict, sampleSize, theorem.start, theorem.goal, theorem.branches, maxTime=1)
-            show_results(timeDict)
+            run_tests(timeDict, sampleSize, p.start, p.goal, p.branches, maxTime=maxTime)
+            show_results(timeDict, maxTime=maxTime)
         print('\n\n')
 
 
