@@ -39,25 +39,33 @@ def show_results(timeDict, maxTime=.1):
     correct = lambda t : float('inf') if t > maxTime else t
     print('')
     keys = sorted(distanceDict.keys())
-    u = mean(timeDict['no_heuristic'])
-    print('p-values for z test from no_heuristic mean:')
-    print('({:d} iterations)'.format(len(timeDict['no_heuristic'])))
-    print('_' * 80)
-    print('{:<28}| {:+f}s | sdev +/- {:f}'.format('no_heuristic', u, stdev(timeDict['no_heuristic'])))
+    if timeDict['no_heuristic'] is not None:
+        u = mean(timeDict['no_heuristic'])
+        print('p-values for z test from no_heuristic mean:')
+        print('({:d} iterations)'.format(len(timeDict['no_heuristic'])))
+        print('_' * 80)
+        print('{:<28}| {:+f}s | sdev +/- {:f}'.format('no_heuristic', u, stdev(timeDict['no_heuristic'])))
+    else:
+        u = 0
     for key in keys:
-        m = mean(timeDict[key])
-        print('{:<28}| {:+f}s | {:+f}s | sdev +/- {:f}'.format(key, correct(m), correct(m) - u, stdev(timeDict[key])))
+        if timeDict[key] is not None:
+            m = mean(timeDict[key])
+            print('{:<28}| {:+f}s | {:+f}s | sdev +/- {:f}'.format(key, correct(m), correct(m) - u, stdev(timeDict[key])))
+        else:
+            print('{:<28}| timeout'.format(key))
     print('_' * 80)
     for key in keys:
-        z = ztest(timeDict[key], u)
-        p = to_p(z)
-        print('{:<28}| {} | {:<10}%'.format(key, sign(z), round(p * 100, 4)))
-    best = sorted(keys, key=lambda k : mean(timeDict[k]))
+        if timeDict[key] is not None:
+            z = ztest(timeDict[key], u)
+            p = to_p(z)
+            print('{:<28}| {} | {:<10}%'.format(key, sign(z), round(p * 100, 4)))
+        else:
+            print('{:<28}| timeout'.format(key))
+
+    best = sorted(keys, key=lambda k : mean(timeDict[k]) if timeDict[k] is not None else 0)
     print('\nFastest algorithm was {}'.format(best[0]))
     print('Followed by {}'.format(best[1]))
-    print('Difference: {}'.format(mean(timeDict[best[0]]) - mean(timeDict[best[1]])))
     print('Worst: {}'.format(best[-1]))
-    print('Difference: {}'.format(mean(timeDict[best[0]]) - mean(timeDict[best[-1]])))
 
 def run_tests(timeDict, sampleSize, start, goal, branches, maxTime=1):
     startTime = time.perf_counter()
@@ -84,8 +92,8 @@ def demo():
     maxTime    = .05
 
     problems = [Problem('MI', 'M' + 'IU' * 2**8, mu_branches),
-                Problem('R.(~P⊃Q)', '(QvP).R', logic_branches)]
-    #,Problem('(R⊃~P).(~R⊃Q)', '~(~Q.P)', logic_branches)]
+                Problem('R.(~P⊃Q)', '(QvP).R', logic_branches),
+                Problem('(R⊃~P).(~R⊃Q)', '~(~Q.P)', logic_branches)]
 
     with timedblock('demo'):
         for p in problems:
