@@ -117,11 +117,12 @@ def theorem_dist(a, b, variables=set('ABCDEFGHIJKLMNOPQRSTUV'), negation='~'):
 
 
 
-
-'''
 def lev_dist(s, t):
     m = len(s)
     n = len(t)
+
+    if m == 0 or n == 0:
+        return 0
 
     d = np.zeros((m, n))
  
@@ -145,5 +146,4 @@ def lev_dist(s, t):
                           d[i, j-1] + 1,                   # insertion
                           d[i-1, j-1] + substitutionCost)  # substitution
  
-    return d[m-1, n-1]
-'''
+    return d[m - 1, n - 1]
