@@ -159,9 +159,9 @@ def alt_theorem_dist(a, b):
 Difference in grouping          (G) !!!
 '''
 
-def lev_dist(s, t):
-    m = len(s)
-    n = len(t)
+def lev_dist(a, b):
+    m = len(a)
+    n = len(b)
 
     if m == 0 or n == 0:
         return 0
@@ -180,7 +180,7 @@ def lev_dist(s, t):
  
     for j in range(n):
         for i in range(m):
-            if s[i] == t[j]:
+            if a[i] == b[j]:
                 substitutionCost = 0
             else:
                 substitutionCost = 1
@@ -189,3 +189,79 @@ def lev_dist(s, t):
                           d[i-1, j-1] + substitutionCost)  # substitution
  
     return d[m - 1, n - 1]
+
+def opt_align_dist(a, b):
+    m = len(a)
+    n = len(b)
+
+    if m == 0 or n == 0:
+        return 0
+
+    d = np.zeros((m, n))
+ 
+    # source prefixes can be transformed into empty string by
+    # dropping all characters
+    for i in range(m):
+        d[i, 0] = i
+ 
+    # target prefixes can be reached from empty source prefix
+    # by inserting every character
+    for j in range(n):
+        d[0, j] = j
+ 
+    for j in range(n):
+        for i in range(m):
+            if a[i] == b[j]:
+                substitutionCost = 0
+            else:
+                substitutionCost = 1
+            d[i, j] = min(d[i-1, j] + 1,                   # deletion
+                          d[i, j-1] + 1,                   # insertion
+                          d[i-1, j-1] + substitutionCost)  # substitution
+            if i > 1 and j > 1 and a[i] == b[j - 1] and a[i - 1] == b[j]:
+                d[i, j] = min(d[i, j],
+                              d[i-2, j-2] + substitutionCost)
+ 
+    return d[m - 1, n - 1]
+
+def dam_lev_dist(a, b):
+    m = len(a)
+    n = len(b)
+
+    if m == 0 or n == 0:
+        return 0
+ 
+    # From psuedocode, inaccurate
+    #let d[−1..length(a), −1..length(b)] be a 2-d array of integers, dimensions length(a)+2, length(b)+2
+    # note that d has indices starting at −1, while a, b and da are one-indexed.
+    # Actually, d is zero indexed, but the same dimensions as described above
+    d = np.zeros((m + 2, n + 2))
+    da = np.zeros((26, 26))
+
+    maxdist = m + n
+    d[0, 0] = maxdist 
+    for i in range(m): 
+        d[i, 0] = maxdist
+        d[i, 1] = i
+    for j in range(n): 
+        d[0, j] = maxdist
+        d[1, j] = j
+
+    for i in range(1, m + 1):
+        db = 0
+        for j in range(1, n + 1):
+            k = 0 #da[b[j]]
+            l = db
+            if a[i - 1] == b[j - 1]:
+                cost = 0
+                db   = j
+            else:
+                cost = 1
+            d[i, j] = min(d[i-1, j-1] + cost,  #substitution
+                          d[i,   j-1] + 1,     #insertion
+                          d[i-1, j  ] + 1,     #deletion
+                          d[k-1, l-1] + (i-k-1) + 1 + (j-l-1)) #transposition
+        #da[a[i]] = i
+        da[0] = i
+    return d[m, n]
+
