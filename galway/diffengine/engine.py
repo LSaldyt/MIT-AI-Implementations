@@ -40,7 +40,7 @@ def test_heuristics():
 def show_results(timeDict, maxTime=.1):
     correct = lambda t : float('inf') if t > maxTime else t
     print('')
-    keys = sorted(distanceDict.keys())
+    keys = sorted(distanceDict.keys(), key = lambda k : mean(timeDict[k]) if timeDict[k] is not None else float('inf'))
     if timeDict['no_heuristic'] is not None:
         u = mean(timeDict['no_heuristic'])
         print('p-values for z test from no_heuristic mean:')
@@ -64,7 +64,7 @@ def show_results(timeDict, maxTime=.1):
         else:
             print('{:<28}| timeout'.format(key))
 
-    best = sorted(keys, key=lambda k : mean(timeDict[k]) if timeDict[k] is not None else 0)
+    best = sorted(keys, key=lambda k : mean(timeDict[k]) if timeDict[k] is not None else float('inf'))
     print('\nFastest algorithm was {}'.format(best[0]))
     print('Followed by {}'.format(best[1]))
     print('Worst: {}'.format(best[-1]))
