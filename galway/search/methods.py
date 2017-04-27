@@ -1,6 +1,10 @@
 from .graph import Graph, to_obstacles
 from math  import sqrt
 
+from collections import namedtuple
+
+Path = namedtuple('Path', ['len', 'path'])
+
 def depth_first(branches, seen, current, end):
     if end in branches(current):
         return (True, seen + [end])
@@ -83,7 +87,7 @@ def beam_search(branches, start, end, width=2, distance=point_distance):
 def branch_and_bound(branches, start, end):
     if start == end:
          return [end]
-    paths = { start : (0, [start])}
+    paths = { start : Path(0, [start])}
 
     while end not in paths:
         shortest = min([(paths[key][0], key) for key in paths])
@@ -96,26 +100,24 @@ def branch_and_bound(branches, start, end):
 
     return paths[end][1]
 
-def astar(branches, start, end, distance=point_distance):
-    paths = { start : (0, [start])}
 
-    pathTo    = lambda key   : paths[key][1]
-    len_to    = lambda key   : paths[key][0]
-    heuristic = lambda point : len_to(point) + distance(point, end)
+
+def astar(branches, start, end, distance=point_distance):
+    paths = { start : Path(0, [start])}
+
+    heuristic = lambda point : paths[point].len * distance(point, end)
 
     while end not in paths:
         # min element of keys sorted by heuristic:
-        shortestKey = sorted([key for key in paths], key=heuristic)[0]
+        shortestKey = min([key for key in paths], key=heuristic)
 
-        # find open adjacent points:
         for adj in branches(shortestKey):
+            l = paths[shortestKey].len + 1
             # add the path if it doesn't exist, update it if a shorter one is found:
-            if adj not in paths or len_to(adj) > len_to(shortestKey)+1:
-                paths[adj] = len_to(shortestKey)+1, pathTo(shortestKey) + [adj]
-
+            if adj not in paths or paths[adj].len > l:
+                paths[adj] = Path(l, paths[shortestKey].path + [adj])
         del paths[shortestKey] # the path to the previously shortest node is now unneeded
-
-    return pathTo(end)
+    return paths[end].path 
 
 mazeString = """
 ......o...

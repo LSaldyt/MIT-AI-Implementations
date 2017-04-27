@@ -1,8 +1,9 @@
-from ..search   import branch_and_bound, breadth_first, breadth_first_2, astar 
+from ..search   import branch_and_bound
 from ..util     import timedblock, ztest, to_p, timeout, sign
 
-from .mu import mu_branches
-from .logic import logic_branches, subterms 
+from .diff_search import astar
+from .mu          import mu_branches
+from .logic       import logic_branches, subterms 
 
 from . import heuristics
 
@@ -81,19 +82,21 @@ def run_tests(timeDict, sampleSize, start, goal, branches, maxTime=1):
         print('.', end='', flush=True)
         if (i + 1) % 10 == 0:
             print(' ({})'.format(i + 1))
+        if i + 1 == sampleSize:
+            print('\nSolution:')
+            pprint(result)
 
 
 Problem = namedtuple('Problem', ['start', 'goal', 'branches'])
 
 def demo():
-    #produce_theorems('R.(~P⊃Q)', logic_branches, 3)
     test_heuristics()
     sampleSize = 30
-    maxTime    = .05
+    maxTime    = 1
 
     problems = [Problem('MI', 'M' + 'IU' * 2**8, mu_branches),
                 Problem('R.(~P⊃Q)', '(QvP).R', logic_branches),
-                Problem('(R⊃~P).(~R⊃Q)', '~(~Q.P)', logic_branches)]
+                Problem('(R⊃~P).(R⊃Q)', '~Rv(~P.Q)', logic_branches)]
 
     with timedblock('demo'):
         for p in problems:
