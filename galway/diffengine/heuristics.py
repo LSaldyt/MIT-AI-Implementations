@@ -152,6 +152,8 @@ def position_dist(a, b):
     return dist
 
 
+def alt_theorem_dist(a, b):
+    return var_dist(a, b) * 10000 + numvar_dist(a, b) * 1000 + sign_dist(a, b) * 100 + binary_connective_dist(a, b) * 10 + position_dist(a, b)
 
 '''
 Difference in grouping          (G) !!!
