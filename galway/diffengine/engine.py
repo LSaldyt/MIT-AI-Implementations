@@ -29,6 +29,7 @@ def produce_theorems(start, branches, depth):
     pprint(to_show)
 
 def demo():
+    compare_heuristics()
     print('Difference engine demonstration:')
     p = Problem('R.(~P⊃Q)', '(QvP).R', logic)
     #v = heuristics.alt_theorem_dist

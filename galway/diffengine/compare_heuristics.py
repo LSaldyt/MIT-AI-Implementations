@@ -4,10 +4,12 @@ from ..util     import timedblock, ztest, to_p, sign
 from .mu          import mu
 from .logic       import logic
 from .problem     import Problem
+from .vplot       import vplot
 from .            import heuristics
 
 from pprint      import pprint
 from statistics  import mean, stdev
+from collections import OrderedDict
 
 import time
 
@@ -91,4 +93,11 @@ def compare_heuristics():
                 timeDict[key] = []
             run_tests(timeDict, sampleSize, p, distanceDict, maxTime=maxTime)
             show_results(timeDict, distanceDict, maxTime=maxTime)
+            timeDict = {k:v for k, v in timeDict.items() if v is not None}
+            d = OrderedDict()
+            pairs = sorted(timeDict.items(), key=lambda x : mean(x[1]))
+            for k, v in pairs:
+                d[k] = v
+            if len(d) > 0:
+                vplot(d)
         print('\n\n')
