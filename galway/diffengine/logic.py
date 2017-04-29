@@ -2,6 +2,8 @@ from pyparsing import *
 from pprint import pprint
 import string, re
 
+from .system import System
+
 '''
 Objects:
     Expressions built recursively from:
@@ -33,21 +35,23 @@ advanced = '''
     [A ⊃ B, B ⊃ C]  -> A ⊃ C
 ''' 
 
-def build_transformers():
-    transformers = [] 
+def build_replacements():
+    replacements = [] 
     for line in strReplacements.split('\n'):
         terms = line.split()
         if len(terms) > 0:
-            transformers.append((terms[0], terms[2], terms[1] == '<->'))
-    return transformers
+            replacements.append((terms[0], terms[2], terms[1] == '<->'))
+    return replacements
 
-transformers = build_transformers()
+replacements = build_replacements()
 
 operators = ['v', '.', '⊃']#, '~']
 
 split_ops = '(%s)' % ')|('.join(map(re.escape, operators))
+split_ops = re.compile(split_ops)
 
 split_imps = '(%s)' % ')|('.join(map(re.escape, ['⊃']))
+split_imps = re.compile(split_imps)
 
 def split_implications(formula):
     for item in re.split(split_imps, formula):
@@ -105,20 +109,51 @@ def extensions(node):
             break
     return options
 
-def replacements(node):
+def generate_transformers():
+    transformers = []
+    for left, right, inverse in replacements:
+        def replacer(node):
+            options = set()
+            def add_theorem(l_pattern, r_pattern):
+                next_formula = node.replace(l_pattern, r_pattern)
+                next_formula = next_formula.replace('~~', '')
+                options.add(next_formula)
+            formula_terms = subterms(node)
+            for term_a in formula_terms:
+                for term_b in formula_terms:
+                    for term_c in formula_terms:
+                        l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+                        r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+
+                        add_theorem(l_pattern, r_pattern)
+                        if inverse:
+                            add_theorem(r_pattern, l_pattern)
+            return options
+        transformers.append(replacer)
+    return transformers
+
+'''
+transformers = generate_transformers()
+def find_replacements(node):
+    options = set()
+    for replacer in transformers:
+        options.update(replacer(node))
+    return options
+
+'''
+def find_replacements(node):
     options = set()
     def add_theorem(l_pattern, r_pattern):
         next_formula = node.replace(l_pattern, r_pattern)
         next_formula = next_formula.replace('~~', '')
         options.add(next_formula)
     formula_terms = subterms(node)
-    for term_a in formula_terms:
-        for term_b in formula_terms:
-            for term_c in formula_terms:
-                for left, right, inverse in transformers:
+    for left, right, inverse in replacements:
+        for term_a in formula_terms:
+            for term_b in formula_terms:
+                for term_c in formula_terms:
                     l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
                     r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
-
                     add_theorem(l_pattern, r_pattern)
                     if inverse:
                         add_theorem(r_pattern, l_pattern)
@@ -159,7 +194,7 @@ def advanced_deductions(theorems):
 
 def logic_branches(theorem):
     options = set()
-    for t in replacements(theorem):#extensions(theorem) | replacements(theorem):
+    for t in find_replacements(theorem):#extensions(theorem) | replacements(theorem):
         options.add(t)
         #if t not in theorems:
         #    options.add(theorems + (t,))
@@ -167,4 +202,6 @@ def logic_branches(theorem):
     #    if t not in theorems:
     #        options.add(theorems + (t,))
     return options
+
+logic = System(logic_branches)
 

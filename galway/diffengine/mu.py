@@ -1,3 +1,5 @@
+from .system import System
+
 def mu_branches(node):
     options = []
     if node.endswith('I'):
@@ -7,3 +9,4 @@ def mu_branches(node):
     options.append(node.replace('UU', ''))
     return options
 
+mu = System(mu_branches)

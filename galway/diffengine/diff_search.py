@@ -1,5 +1,7 @@
 from collections import namedtuple
 
+#from .logic import transformers
+
 Path = namedtuple('Path', ['len', 'path'])
 
 '''
@@ -22,7 +24,7 @@ def diff_search(start, end, heuristics, transformers):
     while end not in paths:
         # min element of keys sorted by heuristic:
         shortestKey = min([key for key in paths], key=lambda point : paths[point].len)
-        scoredKeys  = sorted([h(start) for h in heuristics])
+        scoredKeys  = sorted(heuristics.keys(), key=lambda k : heuristics[k](start))
 
         for transform in (transformers[key] for key in scoredKeys):
             adj = transform(shortestKey)
@@ -42,4 +44,11 @@ Should account for (in order of importance):
     Difference in binary connective (C)
     Difference in grouping          (G)
     Difference in position          (P)
+'''
+
+'''
+Needed: transformer-heuristic associations
+heuristics: dictionary of functions
+transformers: dictionary of functions
+
 '''
