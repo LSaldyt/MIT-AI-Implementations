@@ -91,3 +91,4 @@ ENV/
 *.aux
 *.log
 *.pdf
+*.png

@@ -35,6 +35,23 @@ def diff_search(start, end, heuristics, transformers):
         del paths[shortestKey] # the path to the previously shortest node is now unneeded
     return paths[end].path 
 
+def alt_astar(branches, start, end, distance):
+    paths = { start : Path(0, [start])}
+
+    heuristic = lambda point : paths[point].len * distance(point, end)
+
+    while end not in paths:
+        # min element of keys sorted by heuristic:
+        shortestKey = min([key for key in paths], key=heuristic)
+
+        for adj in branches(shortestKey, paths[shortestKey].path):
+            l = paths[shortestKey].len + 1
+            # add the path if it doesn't exist, update it if a shorter one is found:
+            if adj not in paths or paths[adj].len > l:
+                paths[adj] = Path(l, paths[shortestKey].path + [adj])
+        del paths[shortestKey] # the path to the previously shortest node is now unneeded
+    return paths[end].path 
+
 '''
 Distance function in the spirit of the original GPS paper
 Should account for (in order of importance):

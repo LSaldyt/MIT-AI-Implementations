@@ -1,7 +1,7 @@
 from ..search   import branch_and_bound, astar
 from ..util     import timedblock, timeout, sign
 
-from .diff_search import diff_search
+from .diff_search import diff_search, alt_astar
 from .mu          import mu
 from .logic       import logic
 from .problem     import Problem
@@ -35,6 +35,6 @@ def demo():
     #v = heuristics.alt_theorem_dist
     v = heuristics.hamming_dist
     with timedblock('proof'):
-        result = astar(logic.branches, p.start, p.goal, distance=v)
+        result = alt_astar(logic.branches, p.start, p.goal, distance=v)
     for i, step in enumerate(result):
         print('{:>5}: {}'.format(i + 1, step))

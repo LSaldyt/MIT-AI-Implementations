@@ -4,7 +4,7 @@ from ..util     import timedblock, ztest, to_p, sign
 from .mu          import mu
 from .logic       import logic
 from .problem     import Problem
-from .vplot       import vplot
+from .plot        import vplot, heatplot
 from .            import heuristics
 
 from pprint      import pprint
@@ -83,8 +83,9 @@ def compare_heuristics():
                 Problem('R.(~P⊃Q)', '(QvP).R', logic),
                 Problem('(R⊃~P).(R⊃Q)', '~Rv(~P.Q)', logic)]
 
+    results = dict()
     with timedblock('demo'):
-        for p in problems:
+        for i, p in enumerate(problems):
             print('')
             print('{} to {}'.format(p.start, p.goal))
             print('')
@@ -93,11 +94,14 @@ def compare_heuristics():
                 timeDict[key] = []
             run_tests(timeDict, sampleSize, p, distanceDict, maxTime=maxTime)
             show_results(timeDict, distanceDict, maxTime=maxTime)
-            timeDict = {k:v for k, v in timeDict.items() if v is not None}
+            preD = {k:v for k, v in timeDict.items() if v is not None}
             d = OrderedDict()
-            pairs = sorted(timeDict.items(), key=lambda x : mean(x[1]))
+            pairs = sorted(preD.items(), key=lambda x : mean(x[1]))
             for k, v in pairs:
                 d[k] = v
             if len(d) > 0:
-                vplot(d)
+                vplot(d, 'output/violin_%s.png' % i)
+            u = 1 if timeDict['no_heuristic'] is None else mean(timeDict['no_heuristic'])
+            results[p.start[:10] + ', ' + p.goal[:10]] = {k : (-1 if v is None else mean(v)/u) for k, v in timeDict.items()}
         print('\n\n')
+    heatplot(results, 'output/heat.png')

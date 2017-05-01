@@ -109,31 +109,29 @@ def extensions(node):
             break
     return options
 
-def generate_transformers():
-    transformers = []
-    for left, right, inverse in replacements:
-        def replacer(node):
-            options = set()
-            def add_theorem(l_pattern, r_pattern):
-                next_formula = node.replace(l_pattern, r_pattern)
-                next_formula = next_formula.replace('~~', '')
-                options.add(next_formula)
-            formula_terms = subterms(node)
-            for term_a in formula_terms:
-                for term_b in formula_terms:
-                    for term_c in formula_terms:
-                        l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
-                        r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
-
-                        add_theorem(l_pattern, r_pattern)
-                        if inverse:
-                            add_theorem(r_pattern, l_pattern)
-            return options
-        transformers.append(replacer)
-    return transformers
-
 '''
-transformers = generate_transformers()
+transformers = []
+for left, right, inverse in replacements:
+    def replacer(node):
+        options = set()
+        def add_theorem(l_pattern, r_pattern):
+            next_formula = node.replace(l_pattern, r_pattern)
+            next_formula = next_formula.replace('~~', '')
+            options.add(next_formula)
+        formula_terms = subterms(node)
+        for term_a in formula_terms:
+            for term_b in formula_terms:
+                for term_c in formula_terms:
+                    l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+                    r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+
+                    add_theorem(l_pattern, r_pattern)
+                    if inverse:
+                        add_theorem(r_pattern, l_pattern)
+        return options
+    transformers.append(replacer)
+
+#transformers = generate_transformers()
 def find_replacements(node):
     options = set()
     for replacer in transformers:
@@ -192,7 +190,7 @@ def advanced_deductions(theorems):
             options.add(a + '⊃' + implications[b]) # A -> B, B -> C, therefore, A -> C 
     return options
 
-def logic_branches(theorem):
+def logic_branches(theorem, previous=set()):
     options = set()
     for t in find_replacements(theorem):#extensions(theorem) | replacements(theorem):
         options.add(t)
