@@ -72,16 +72,17 @@ def run_tests(timeDict, sampleSize, problem, distanceDict, maxTime=1):
             pprint(result)
 
 
-def compare_heuristics():
+def compare_heuristics(problems=None):
     distanceDict = { name : f for name, f in heuristics.__dict__.items() if callable(f) and name.endswith('dist')}
     test_heuristics()
 
     sampleSize = 30
     maxTime    = .1
 
-    problems = [Problem('MI', 'M' + 'IU' * 2**8, mu),
-                Problem('R.(~P⊃Q)', '(QvP).R', logic),
-                Problem('(R⊃~P).(R⊃Q)', '~Rv(~P.Q)', logic)]
+    if problems is None:
+        problems = [Problem('MI', 'M' + 'IU' * 2**8, mu),
+                    Problem('R.(~P⊃Q)', '(QvP).R', logic),
+                    Problem('(R⊃~P).(R⊃Q)', '~Rv(~P.Q)', logic)]
 
     results = dict()
     with timedblock('demo'):

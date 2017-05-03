@@ -1,5 +1,5 @@
-from pyparsing import *
 from pprint import pprint
+from functools import partial
 import string, re
 
 from .system import System
@@ -14,6 +14,7 @@ Objects:
 Operators:
 '''
 strReplacements = '''
+    ~(~A)           -> A
     AvB            <-> BvA
     A.B            <-> B.A
     A⊃B             -> ~B⊃~A
@@ -109,54 +110,25 @@ def extensions(node):
             break
     return options
 
-'''
-transformers = []
-for left, right, inverse in replacements:
-    def replacer(node):
-        options = set()
-        def add_theorem(l_pattern, r_pattern):
-            next_formula = node.replace(l_pattern, r_pattern)
-            next_formula = next_formula.replace('~~', '')
-            options.add(next_formula)
-        formula_terms = subterms(node)
-        for term_a in formula_terms:
-            for term_b in formula_terms:
-                for term_c in formula_terms:
-                    l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
-                    r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+def replacement(node, terms, options, left, right, inverse):
+    for term_a in terms:
+        for term_b in terms:
+            for term_c in terms:
+                l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+                r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
+                next_formula = node.replace(l_pattern, r_pattern).replace('~~','')
+                options.add(next_formula)
+                if inverse:
+                    next_formula = node.replace(r_pattern, l_pattern).replace('~~','')
+                    options.add(next_formula)
 
-                    add_theorem(l_pattern, r_pattern)
-                    if inverse:
-                        add_theorem(r_pattern, l_pattern)
-        return options
-    transformers.append(replacer)
-
-#transformers = generate_transformers()
+transformers = [partial(replacement, left=l, right=r, inverse=i) for l, r, i in replacements]
 def find_replacements(node):
     options = set()
-    for replacer in transformers:
-        options.update(replacer(node))
+    terms = subterms(node)
+    for t in transformers:
+        t(node, terms, options)
     return options
-
-'''
-def find_replacements(node):
-    options = set()
-    def add_theorem(l_pattern, r_pattern):
-        next_formula = node.replace(l_pattern, r_pattern)
-        next_formula = next_formula.replace('~~', '')
-        options.add(next_formula)
-    formula_terms = subterms(node)
-    for left, right, inverse in replacements:
-        for term_a in formula_terms:
-            for term_b in formula_terms:
-                for term_c in formula_terms:
-                    l_pattern = left.replace('A', term_a).replace('B', term_b).replace('C', term_c)
-                    r_pattern = right.replace('A', term_a).replace('B', term_b).replace('C', term_c)
-                    add_theorem(l_pattern, r_pattern)
-                    if inverse:
-                        add_theorem(r_pattern, l_pattern)
-    return options
-
 
 def deductions(theorems):
     options = set()
@@ -190,15 +162,17 @@ def advanced_deductions(theorems):
             options.add(a + '⊃' + implications[b]) # A -> B, B -> C, therefore, A -> C 
     return options
 
-def logic_branches(theorem, previous=set()):
+def logic_branches(theorem, previous=None):
+    if previous is None:
+        previous = []
     options = set()
-    for t in find_replacements(theorem):#extensions(theorem) | replacements(theorem):
+    for t in find_replacements(theorem):# | extensions(theorem):
         options.add(t)
-        #if t not in theorems:
-        #    options.add(theorems + (t,))
+    theorems = previous + [theorem]
+    for t in advanced_deductions(theorems):
+        options.add(t)
     #for t in deductions(theorems) | advanced_deductions(theorems):
-    #    if t not in theorems:
-    #        options.add(theorems + (t,))
+    #    options.add(t)
     return options
 
 logic = System(logic_branches)

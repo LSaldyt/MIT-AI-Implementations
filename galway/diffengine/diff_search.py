@@ -35,8 +35,10 @@ def diff_search(start, end, heuristics, transformers):
         del paths[shortestKey] # the path to the previously shortest node is now unneeded
     return paths[end].path 
 
-def alt_astar(branches, start, end, distance):
-    paths = { start : Path(0, [start])}
+def alt_astar(branches, start, end, distance, axioms=None):
+    if axioms is None:
+        axioms = []
+    paths = { start : Path(0, axioms + [start])}
 
     heuristic = lambda point : paths[point].len * distance(point, end)
 
