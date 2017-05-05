@@ -60,7 +60,9 @@ class Memorize(object):
         """
         filename = _slugify(self.parent_filename.replace('.py', ''))
         funcname = _slugify(self.__name__)
-        self.cache_filename = filename+'_'+funcname+'.cache'
+        if not os.path.exists('__memo_cache__'):
+            os.makedirs('__memo_cache__')
+        self.cache_filename = '__memo_cache__/' + filename+'_'+funcname+'.cache'
 
     def get_last_update(self):
         """
