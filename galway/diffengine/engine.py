@@ -1,7 +1,7 @@
 from ..search   import branch_and_bound, astar
 from ..util     import timedblock, timeout, sign
 
-from .diff_search import alt_astar#, diff_search
+from .diff_search import alt_astar, diff_search
 from .systems     import logic
 from .problem     import Problem, solve
 from .theoremnode import TheoremNode
@@ -29,7 +29,6 @@ def produce_theorems(start, branches, depth):
             to_show.add(t)
     pprint(to_show)
 
-'''
 def create_random_proof(start, branches, depth):
     last = start
     for i in range(depth):
@@ -38,7 +37,7 @@ def create_random_proof(start, branches, depth):
 
 def random_compare(amount, depth=3):
     seen = set()
-    start = 'R.(~P⊃Q)'
+    start = TheoremNode('R.(~P⊃Q)')
     problems = []
     for i in range(amount):
         last = create_random_proof(start, logic.branches, depth)
@@ -48,15 +47,14 @@ def random_compare(amount, depth=3):
         seen.add(last)
     pprint(problems)
     compare_heuristics(problems)
-'''
-
-#print(diff_search(start, end, diffList, transformers))
 
 def demo():
-    #produce_theorems('P⊃Q', logic.branches, 4)
-    #diff_search('P⊃Q', 'Qv~P', logic)
     print('Difference engine demonstration:')
-    p = Problem(TheoremNode('P⊃Q'), 
+    #produce_theorems('P⊃Q', logic.branches, 4)
+    with timedblock('proof'):
+        result = diff_search(TheoremNode('P⊃Q'), TheoremNode('Qv~P'), logic)
+    print(result)
+    p = Problem(TheoremNode('P⊃Q', {'P'}), 
                 TheoremNode('Qv~P'), logic)
     v = heuristics.hamming_dist
     with timedblock('proof'):

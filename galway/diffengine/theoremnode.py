@@ -29,6 +29,15 @@ class TheoremNode():
     def __str__(self):
         return self.end
 
+    def __repr__(self):
+        return 'TheoremNode({})'.format(self.end)
+
+    def __len__(self):
+        return len(self.end)
+
+    def count(self, n):
+        return self.end.count(n)
+
     @property
     def theorems(self):
         return self._theorems

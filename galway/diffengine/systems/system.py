@@ -40,4 +40,7 @@ class System():
         return options
 
 
+    def __repr__(self):
+        return 'System()'
+
 
