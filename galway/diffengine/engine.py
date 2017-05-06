@@ -62,10 +62,11 @@ def difference_search_demo(start, end):
     def to_c(c):
         return 'C'
 
-    diffPairs = [(is_not_b, to_b), (is_not_c, to_c)]
+    diffList = [(is_not_b, ['to_b']), (is_not_c, ['to_c'])]
+    transformers = {'to_b' : to_b, 'to_c' : to_c}
 
     print('Path from {} to {}:'.format(start, end))
-    print(diff_search(start, end, diffPairs))
+    print(diff_search(start, end, diffList, transformers))
 
 def demo():
     difference_search_demo('A', 'B')
