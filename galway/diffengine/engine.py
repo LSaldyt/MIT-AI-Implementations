@@ -1,17 +1,16 @@
 from ..search   import branch_and_bound, astar
 from ..util     import timedblock, timeout, sign
 
-from .diff_search import diff_search, alt_astar
-from .mu          import mu
-from .logic       import logic
+from .diff_search import alt_astar, diff_search
+from .systems     import mu, logic, System
 from .problem     import Problem, solve
-from .system      import System
 from .            import heuristics
 
 from .compare_heuristics import compare_heuristics
 
-from pprint import pprint
-from random import choice
+from pprint      import pprint
+from random      import choice
+from collections import OrderedDict
 
 def produce_theorems(start, branches, depth, axioms=None):
     if axioms is None:
@@ -50,7 +49,28 @@ def random_compare(amount, depth=3):
     pprint(problems)
     compare_heuristics(problems)
 
+def difference_search_demo(start, end):
+    def is_not_b(c):
+        return c != 'B'
+
+    def to_b(c):
+        return 'B'
+
+    def is_not_c(c):
+        return c != 'C'
+
+    def to_c(c):
+        return 'C'
+
+    diffPairs = [(is_not_b, to_b), (is_not_c, to_c)]
+
+    print('Path from {} to {}:'.format(start, end))
+    print(diff_search(start, end, diffPairs))
+
 def demo():
+    difference_search_demo('A', 'B')
+    difference_search_demo('A', 'C')
+    '''
     print('Difference engine demonstration:')
     p = Problem('P⊃Q', 'R', logic, ['P', 'Q⊃R'])
     v = heuristics.hamming_dist
@@ -58,3 +78,4 @@ def demo():
         result = solve(p, v)
     for i, step in enumerate(result):
         print('{:>5}: {}'.format(i + 1, step))
+    '''

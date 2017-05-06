@@ -1,11 +1,10 @@
 from ..search   import branch_and_bound, astar
 from ..util     import timedblock, ztest, to_p, sign
 
-from .mu          import mu
-from .logic       import logic
-from .problem     import Problem
-from .plot        import vplot, heatplot
-from .            import heuristics
+from .systems import mu, logic
+from .problem import Problem
+from .plot    import vplot, heatplot
+from .        import heuristics
 
 from pprint      import pprint
 from statistics  import mean, stdev
