@@ -9,5 +9,4 @@ def solve(problem, d):
     return alt_astar(problem.system.branches, 
                      problem.start, 
                      problem.goal, 
-                     distance=d,
-                     axioms=problem.axioms)
+                     distance=d)

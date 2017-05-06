@@ -1,8 +1,9 @@
 from pprint import pprint
 
 from .system    import System
-from .transform import build_transformers
-from .subterms  import build_subterm_function
+
+from .. import logic_heuristics
+
 
 '''
 Objects:
@@ -36,21 +37,5 @@ advanced = '''
     [A ⊃ B, B ⊃ C]  -> A ⊃ C
 ''' 
 
-transformers = build_transformers(strReplacements)
-subterms     = build_subterm_function(['.', 'v', '⊃'])
-
-def find_replacements(node):
-    options = set()
-    terms = subterms(node)
-    for t in transformers:
-        t(node, terms, options)
-    return options
-
-def logic_branches(theorem):
-    options = set()
-    for t in find_replacements(theorem):
-        options.add(t)
-    return options
-
-logic = System(logic_branches)
-
+heuristics = [f for f in logic_heuristics.__dict__.values() if callable(f)]
+logic = System(strReplacements, ['.', 'v', '⊃'], heuristics)

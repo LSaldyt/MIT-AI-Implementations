@@ -12,7 +12,8 @@ def _build_replacements(replacementStr):
                 terms[0], terms[2], terms[1] == '<->'))
     return replacements
 
-def _apply_replacement(node, terms, options, replacement):
+def _apply_replacement(node, terms, replacement):
+    options = set()
     for term_a in terms:
         for term_b in terms:
             for term_c in terms:
@@ -23,6 +24,7 @@ def _apply_replacement(node, terms, options, replacement):
                 if replacement.reversible:
                     next_formula = node.replace(r_pattern, l_pattern).replace('~~','')
                     options.add(next_formula)
+    return options
 
 def build_transformers(replacementStr):
     replacements = _build_replacements(replacementStr)

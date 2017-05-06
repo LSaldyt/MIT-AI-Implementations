@@ -2,10 +2,8 @@ from collections import namedtuple
 
 Path = namedtuple('Path', ['len', 'path'])
 
-def alt_astar(branches, start, end, distance, axioms=None):
-    if axioms is None:
-        axioms = []
-    paths = { start : Path(0, axioms + [start])}
+def alt_astar(branches, start, end, distance):
+    paths = { start : Path(0, [start])}
 
     heuristic = lambda point : paths[point].len * distance(point, end)
 
@@ -13,7 +11,7 @@ def alt_astar(branches, start, end, distance, axioms=None):
         # min element of keys sorted by heuristic:
         shortestKey = min([key for key in paths], key=heuristic)
 
-        for adj in branches(shortestKey, paths[shortestKey].path):
+        for adj in branches(shortestKey):
             l = paths[shortestKey].len + 1
             # add the path if it doesn't exist, 
             # update it if a shorter one is found:
@@ -23,36 +21,22 @@ def alt_astar(branches, start, end, distance, axioms=None):
         del paths[shortestKey] 
     return paths[end].path 
 
-class NoPathException(Exception):
-    pass
-
-def diff_search(start, end, diffList, transformers):
+def diff_search(start, end, system):
+    1/0
     if start == end:
         return [end]
-    for hueristic, transKeys in diffList:
-        try:
-            if hueristic(start):
+
+    paths = { start : Path(0, [start])}
+
+    while end not in paths:
+        for hueristic, transKeys in system.diffList:
+            if hueristic(start, end):
                 for key in transKeys:
-                    return ([start] + 
-                            diff_search(transformers[key](start), 
-                                end, diffList, transformers))
-        except NoPathException as e:
-            # Continue to the next hueristic, or fail if none work
-            pass
-    raise NoPathException(
-            'The theorem {} cannot be proven from {}'.format(start, end))
+                    options = system.transformers[key](start, 
+                                                       system.subterms(start))
+                    for option in options:
+                        return ([start] + 
+                                diff_search(option, 
+                                            end, 
+                                            system))
 
-'''
-Distance function in the spirit of the original GPS paper
-Should account for (in order of importance):
-    Difference in variable          (V)
-    Difference in num variables     (N)
-    Difference in sign              (T)
-    Difference in binary connective (C)
-    Difference in grouping          (G)
-    Difference in position          (P)
-
-Needed: transformer-heuristic associations
-heuristics: dictionary of functions
-transformers: dictionary of functions
-'''
