@@ -1,17 +1,14 @@
-from ..search   import branch_and_bound, astar
-from ..util     import timedblock, timeout, sign
+from ..util   import timedblock, timeout, sign
+from ..search.methods import *
 
-from .diff_search import alt_astar, diff_search
 from .systems     import logic
-from .problem     import Problem, solve
 from .theoremnode import TheoremNode
 from .            import heuristics
-
-from .compare_heuristics import compare_heuristics
 
 from pprint      import pprint
 from random      import choice
 from collections import OrderedDict
+from functools   import partial
 
 def produce_theorems(start, branches, depth):
     theorems = {start}
@@ -35,29 +32,36 @@ def create_random_proof(start, branches, depth):
         last = choice(list(branches(last)))
     return last 
 
-def random_compare(amount, depth=3):
-    seen = set()
-    start = TheoremNode('R.(~P⊃Q)')
-    problems = []
-    for i in range(amount):
-        last = create_random_proof(start, logic.branches, depth)
-        while last in seen:
-            last = create_random_proof(start, logic.branches, depth)
-        problems.append(Problem(start, last, logic))
-        seen.add(last)
-    pprint(problems)
-    compare_heuristics(problems)
-
-def demo():
-    print('Difference engine demonstration:')
-    #produce_theorems('P⊃Q', logic.branches, 4)
-    with timedblock('proof'):
-        result = diff_search(TheoremNode('P⊃Q'), TheoremNode('Qv~P'), logic)
-    print(result)
-    p = Problem(TheoremNode('P⊃Q', {'P'}), 
-                TheoremNode('Qv~P'), logic)
-    v = heuristics.hamming_dist
-    with timedblock('proof'):
-        result = solve(p, v)
+def test_algo(a, start, end):
+    from inspect import getfullargspec
+    args = getfullargspec(a).args
+    if 'distance' not in args:
+        with timedblock(a.__name__):
+            result = a(logic.branches, start, end)
+    else:
+        with timedblock(a.__name__):
+            result = a(logic.branches, start, end, 
+                    distance=heuristics.hamming_len_dist)
     for i, step in enumerate(result):
         print('{:>5}: {}'.format(i + 1, step))
+
+def compare_algos():
+    start = TheoremNode('R.(~P⊃Q)')
+    end   = TheoremNode('(QvP).R')
+    print('Difference engine demonstration:')
+    with timedblock('proof'):
+        result = logic.prove(start, end)
+    for i, step in enumerate(result):
+        print('{:>5}: {}'.format(i + 1, step))
+    test = partial(test_algo, start=start, end=end)
+    test(branch_and_bound)
+    test(depth_first)
+    test(breadth_first)
+    test(breadth_first_2)
+    test(hill_climbing)
+    test(beam_search)
+    test(branch_and_bound)
+    test(astar)
+
+def demo():
+    compare_algos()

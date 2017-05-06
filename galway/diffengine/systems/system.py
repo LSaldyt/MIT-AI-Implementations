@@ -1,30 +1,36 @@
 from .transform import build_transformers
 from .subterms  import build_subterm_function
+from .path      import Path
 
 class System():
-    def __init__(self, strReplacements, operators, heuristics):
+    def __init__(self, 
+                 name,
+                 strReplacements, 
+                 operators, 
+                 heuristics, 
+                 special_transformers=None):
+        self.name = name
+
+        if special_transformers is None:
+            special_transformers = []
+        self.special_transformers = special_transformers
+
         self.transformers = build_transformers(strReplacements)
         self.subterms     = build_subterm_function(operators)
+
         self.diffList = []
         for heuristic in heuristics:
             transformKeys = []
-            for i, line in enumerate(strReplacements.split('\n')):
+            i = 0
+            for line in strReplacements.split('\n'):
                 terms = line.split()
                 if len(terms) == 3:
                     a, _, b = terms 
                     if heuristic(a, b):
                         transformKeys.append(i)
+                    i += 1
             self.diffList.append((heuristic, transformKeys))
 
-    '''
-    def diff_search(start, end, diffList, transformers):
-        if start == end:
-            return [end]
-        for hueristic, transKeys in diffList:
-            try:
-                if hueristic(start):
-                    for key in transKeys:
-    '''
 
     def _find_replacements(self, node):
         options = set()
@@ -41,6 +47,40 @@ class System():
 
 
     def __repr__(self):
-        return 'System()'
+        return 'System({})'.format(self.name)
+
+    def prove(self, start, end):
+        if end in start.theorems:
+            return []
+        paths = { start : Path(0, [start])}
+        heuristic = lambda point : paths[point].len
+
+        while end not in paths:
+            # min element of keys sorted by heuristic:
+            current = min([key for key in paths], key=heuristic)
+            for hueristic, transKeys in self.diffList:
+                if hueristic(current, end):
+                    for key in transKeys:
+                        options = (self.transformers[key](current,
+                                                          self.subterms(current))
+                                   | self.special_transformers(current))
+                        for option in options:
+                            l = paths[current].len + 1
+                            # add the path if it doesn't exist, 
+                            # update it if a shorter one is found:
+                            if option not in paths or paths[option].len > l:
+                                paths[option] = Path(l, paths[current].path + [option])
+            del paths[current]
+        return paths[end].path
+
+    def branches(self, current, end):
+        options = set()
+        for hueristic, transKeys in self.diffList:
+            if hueristic(current, end):
+                for key in transKeys:
+                    options |= (self.transformers[key](current,
+                                                      self.subterms(current))
+                               | self.special_transformers(current))
+        return options
 
 

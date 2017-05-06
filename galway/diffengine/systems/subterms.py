@@ -10,10 +10,13 @@ def build_splitter(terms):
     return splitter
 
 def _strip_parens(term):
-    assert len(term) >= 2
-    assert term[0]  == '('
-    assert term[-1] == ')'
-    return term[1:-1]
+    a = len(term) >= 2
+    b = term[0]  == '('
+    c = term[-1] == ')'
+    if a and b and c:
+        return term[1:-1]
+    else:
+        return term
 
 def _nested_matcher (n):
     '''

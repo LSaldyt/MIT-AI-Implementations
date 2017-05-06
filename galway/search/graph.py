@@ -13,16 +13,18 @@ class Graph(object):
         self.height = height
         self.width  = width
         self.obstructions = obstructions
-        self.points = {(x, y) : self.get_adjacent((x, y)) for x in range(width) for y in range(height)}
+        self.points = {(x, y) : self.get_adjacent((x, y), None) for x in range(width) for y in range(height)}
 
-    def get_adjacent(self, point):
+    def get_adjacent(self, point, end):
         (x, y) = point
         return [p for p in [(x+1, y), (x-1, y), (x, y+1), (x, y-1)] if self.within(p) and p not in self.obstructions]
 
     def within(self, p):
         return p[0] < self.height and p[0] >= 0 and p[1] < self.width and p[1] >= 0
 
-    def show(self, path=[]):
+    def show(self, path=None):
+        if path is None:
+            path = []
         for y in range(self.height):
             print()
             for x in range(self.width):
