@@ -36,7 +36,7 @@ class System():
     def branches(self, theorem):
         options = set()
         for t in self._find_replacements(theorem):
-            options.add(t)
+            options.add(theorem + t)
         return options
 
 

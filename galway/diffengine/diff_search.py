@@ -3,6 +3,7 @@ from collections import namedtuple
 Path = namedtuple('Path', ['len', 'path'])
 
 def alt_astar(branches, start, end, distance):
+    print(start, end)
     paths = { start : Path(0, [start])}
 
     heuristic = lambda point : paths[point].len * distance(point, end)
@@ -21,6 +22,7 @@ def alt_astar(branches, start, end, distance):
         del paths[shortestKey] 
     return paths[end].path 
 
+'''
 def diff_search(start, end, system):
     1/0
     if start == end:
@@ -40,3 +42,5 @@ def diff_search(start, end, system):
                                             end, 
                                             system))
 
+
+'''

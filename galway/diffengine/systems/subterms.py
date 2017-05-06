@@ -28,7 +28,7 @@ def _nested_matcher (n):
 _parens = re.compile('[^][()]+|[([]' + _nested_matcher(100) + '[])]')
 
 def _split_parens(formula):
-    return _parens.findall(formula)
+    return _parens.findall(str(formula))
 
 def build_subterm_function(splitby):
     splitter = build_splitter(splitby)

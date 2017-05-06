@@ -1,9 +1,10 @@
 from ..search   import branch_and_bound, astar
 from ..util     import timedblock, timeout, sign
 
-from .diff_search import alt_astar, diff_search
+from .diff_search import alt_astar#, diff_search
 from .systems     import logic
 from .problem     import Problem, solve
+from .theoremnode import TheoremNode
 from .            import heuristics
 
 from .compare_heuristics import compare_heuristics
@@ -52,10 +53,11 @@ def random_compare(amount, depth=3):
 #print(diff_search(start, end, diffList, transformers))
 
 def demo():
-    produce_theorems('P⊃Q', logic.branches, 4)
+    #produce_theorems('P⊃Q', logic.branches, 4)
     #diff_search('P⊃Q', 'Qv~P', logic)
     print('Difference engine demonstration:')
-    p = Problem('P⊃Q', 'Qv~P', logic)
+    p = Problem(TheoremNode('P⊃Q'), 
+                TheoremNode('Qv~P'), logic)
     v = heuristics.hamming_dist
     with timedblock('proof'):
         result = solve(p, v)
