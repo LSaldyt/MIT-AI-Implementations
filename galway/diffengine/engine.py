@@ -12,14 +12,12 @@ from pprint      import pprint
 from random      import choice
 from collections import OrderedDict
 
-def produce_theorems(start, branches, depth, axioms=None):
-    if axioms is None:
-        axioms = []
+def produce_theorems(start, branches, depth):
     theorems = {start}
     for i in range(depth):
         new_theorems = set()
         for t in theorems:
-            new_theorems.update(set(branches(t, axioms)))
+            new_theorems.update(set(branches(t)))
         theorems.update(new_theorems)
 
     to_show = set()
@@ -30,6 +28,7 @@ def produce_theorems(start, branches, depth, axioms=None):
             to_show.add(t)
     pprint(to_show)
 
+'''
 def create_random_proof(start, branches, depth):
     last = start
     for i in range(depth):
@@ -48,6 +47,7 @@ def random_compare(amount, depth=3):
         seen.add(last)
     pprint(problems)
     compare_heuristics(problems)
+'''
 
 def difference_search_demo(start, end):
     def is_not_b(c):
@@ -69,8 +69,9 @@ def difference_search_demo(start, end):
     print(diff_search(start, end, diffList, transformers))
 
 def demo():
-    difference_search_demo('A', 'B')
-    difference_search_demo('A', 'C')
+    #difference_search_demo('A', 'B')
+    #difference_search_demo('A', 'C')
+    produce_theorems('P⊃Q', logic.branches, 4)
     '''
     print('Difference engine demonstration:')
     p = Problem('P⊃Q', 'R', logic, ['P', 'Q⊃R'])

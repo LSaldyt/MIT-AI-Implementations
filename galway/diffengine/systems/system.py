@@ -1,4 +1,3 @@
-
 class System():
     def __init__(self, branches):
         self.branches = branches
