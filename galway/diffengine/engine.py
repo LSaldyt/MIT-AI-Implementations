@@ -32,36 +32,10 @@ def create_random_proof(start, branches, depth):
         last = choice(list(branches(last)))
     return last 
 
-def test_algo(a, start, end):
-    from inspect import getfullargspec
-    args = getfullargspec(a).args
-    if 'distance' not in args:
-        with timedblock(a.__name__):
-            result = a(logic.branches, start, end)
-    else:
-        with timedblock(a.__name__):
-            result = a(logic.branches, start, end, 
-                    distance=heuristics.hamming_len_dist)
-    for i, step in enumerate(result):
-        print('{:>5}: {}'.format(i + 1, step))
-
-def compare_algos():
+def demo():
     start = TheoremNode('R.(~P⊃Q)')
     end   = TheoremNode('(QvP).R')
-    print('Difference engine demonstration:')
-    with timedblock('proof'):
-        result = logic.prove(start, end)
+    with timedblock('proof', maxTime=1):
+        result = logic.prove(start, end, heuristics.hamming_len_dist)
     for i, step in enumerate(result):
         print('{:>5}: {}'.format(i + 1, step))
-    test = partial(test_algo, start=start, end=end)
-    test(branch_and_bound)
-    test(depth_first)
-    test(breadth_first)
-    test(breadth_first_2)
-    test(hill_climbing)
-    test(beam_search)
-    test(branch_and_bound)
-    test(astar)
-
-def demo():
-    compare_algos()

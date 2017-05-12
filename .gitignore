@@ -94,3 +94,6 @@ ENV/
 *.png
 
 *.cache
+
+# Workspace stuff (for now)
+galway/lispmeat

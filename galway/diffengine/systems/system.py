@@ -2,6 +2,8 @@ from .transform import build_transformers
 from .subterms  import build_subterm_function
 from .path      import Path
 
+from ...search.methods import *
+
 class System():
     def __init__(self, 
                  name,
@@ -49,31 +51,10 @@ class System():
     def __repr__(self):
         return 'System({})'.format(self.name)
 
-    def prove(self, start, end):
-        if end in start.theorems:
-            return []
-        paths = { start : Path(0, [start])}
-        heuristic = lambda point : paths[point].len
+    def prove(self, start, end, distance=lambda a, b : 0):
+        return astar(self._branches, start, end, distance)
 
-        while end not in paths:
-            # min element of keys sorted by heuristic:
-            current = min([key for key in paths], key=heuristic)
-            for hueristic, transKeys in self.diffList:
-                if hueristic(current, end):
-                    for key in transKeys:
-                        options = (self.transformers[key](current,
-                                                          self.subterms(current))
-                                   | self.special_transformers(current))
-                        for option in options:
-                            l = paths[current].len + 1
-                            # add the path if it doesn't exist, 
-                            # update it if a shorter one is found:
-                            if option not in paths or paths[option].len > l:
-                                paths[option] = Path(l, paths[current].path + [option])
-            del paths[current]
-        return paths[end].path
-
-    def branches(self, current, end):
+    def _branches(self, current, end):
         options = set()
         for hueristic, transKeys in self.diffList:
             if hueristic(current, end):
