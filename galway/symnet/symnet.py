@@ -51,6 +51,11 @@ class SymbolNet():
         for c in causes:
             self._add_cause(key, relation, node, c)
 
+    def query(self, clause):
+        return clause.name in self.symbolDict and\
+               clause.relation in self.symbolDict[clause.name] and\
+               clause.node in self.symbolDict[clause.name][clause.relation]
+
     def find_that(self, relation, node):
         return self.relations[(relation, node)]
 
@@ -118,6 +123,7 @@ class SymbolNet():
 
     def likely(self, key, endrelation, endnode):
         self._conclude(key)
+                     
         reasonDict = defaultdict(set)
         for relation, nodes in self.symbolDict[key].items():
             for node in nodes:
@@ -125,16 +131,19 @@ class SymbolNet():
                 for item in close:
                     if item != key:
                         reasonDict[item].add((relation, node))
+        close = self.find_that(endrelation, endnode)
         for similarity, reasons in reasonDict.items():
-            print('A {} is similar to a {} because they share:'.format(key, similarity))
-            for reason in reasons:
-                print('    {}'.format(reason))
-            close = self.find_that(endrelation, endnode)
-            for item in close:
-                if item == similarity:
+            supersedes = self.query(Clause(similarity, 'supersedes', key))
+            if similarity in close:
+                if supersedes:
+                    print('Because {} supersedes {}, it is certain that:'.format(key, similarity))
+                    print('{} {} {}'.format(key, endrelation, endnode))
+                else:
                     print('Because a {} is similar to a {}, a {} likely:'.format(key, similarity, key))
-                    print('Likelihood based on {} similarities'.format(len(reasons)))
                     print(endrelation, endnode)
+                    print('    {} and {} share:'.format(key, similarity))
+                    for reason in reasons:
+                        print('        {}'.format(reason))
 
 
 
