@@ -41,9 +41,24 @@ def cup():
     net.add('briefcase', 'is', 'useful', cause=Clause('briefcase', 'holds', 'papers'))
     net.add('bowl', 'carries', 'liquid', cause=Clause('bowl', 'has', 'concavity'))
     net.add('bowl', 'contains', 'cherry-soup')
+
+    net.add('cup', 'is', 'stable')
+    net.add('cup', 'enables', 'drinking')
+
+    net.add('mystery-object', 'madeof', 'porcelain')
+    net.add('mystery-object', 'hasa', 'decoration')
+    net.add('mystery-object', 'hasa', 'concavity')
+    net.add('mystery-object', 'hasa', 'handle')
+    net.add('mystery-object', 'hasa', 'flatbottom')
+
     print(net)
+    net.show('mystery-object', 'cup')
+    print(net)
+    print(net.trace_reasons(Clause('mystery-object', 'supersedes', 'cup')))
+
+
 
 def demo():
-    description_matching()
-    macbeth()
+    #description_matching()
+    #macbeth()
     cup()

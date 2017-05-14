@@ -8,7 +8,7 @@ class RelationDict():
         return self.relations[key]
 
     def __contains__(self, key):
-        return key in self
+        return key in self.relations
 
     def __str__(self):
         l = max(len(s) for s in self.relations.keys())
@@ -19,4 +19,7 @@ class RelationDict():
         assert key in self.relations
         assert node in self.relations[key]
         self.relations[key].remove(node)
+
+    def items(self):
+        return self.relations.items()
 
