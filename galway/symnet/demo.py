@@ -34,7 +34,7 @@ def macbeth():
 def cup():
     net = SymbolNet()
     net.add('brick', 'is', 'stable', cause=Clause('brick', 'hasa', 'flatbottom'))
-    net.add('brike', 'is', 'heavy')
+    net.add('brick', 'is', 'heavy')
     net.add('glass', 'enables', 'drinking', causes=[Clause('glass', 'hasa', 'handle'), Clause('glass', 'carries', 'liquid')])
     net.add('glass', 'is', 'pretty')
     net.add('briefcase', 'is', 'liftable', causes=[Clause('briefcase', 'has', 'handle'), Clause('briefcase', 'is', 'light')])
@@ -53,10 +53,11 @@ def cup():
 
     print(net)
     net.show('mystery-object', 'cup')
-    print(net)
-    print(net.trace_reasons(Clause('mystery-object', 'supersedes', 'cup')))
+    print(net.relationTypes)
 
-
+    net.likely('glass', 'hasa', 'concavity')
+    net.likely('cup', 'hasa', 'concavity')
+    net.likely('mystery-object', 'is', 'heavy')
 
 def demo():
     #description_matching()

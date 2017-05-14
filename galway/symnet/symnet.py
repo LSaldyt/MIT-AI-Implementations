@@ -1,4 +1,5 @@
 from collections import defaultdict, Counter
+from pprint      import pprint
 
 from ..util.orderedset import OrderedSet
 
@@ -7,24 +8,17 @@ from .relationdict import RelationDict
 
 class SymbolNet():
     '''
-    X --relation--> Y
-
-    SymbolNet:
+    Maps relations and relation causes of objects
+    symbolDict:
         Dictionary {name : {relation : set(connected nodes)}}
         Each of connected nodes is in Dictionary
-        An item is atomic is it has no relations (terminal)
-
-    def __getitem__(self, key):
-        return self.symbolDict[key]
-
-    def __contains__(self, key):
-        return key in self.symbolDict
-
+        An item is relationally atomic is it has no relations (terminal)
+        An item is causally atomic if its cause is atomic: cause = '__atomic__'
     Relations : {(relation, node) : set()}
 
     causedict: {(relation, node) : cause}
-
     '''
+
     reserved = {'__atomic__'}
     
     def __init__(self):
@@ -40,12 +34,11 @@ class SymbolNet():
 
     def _add_cause(self, key, relation, node, cause):
         self.causeDict[(relation, node)].append(cause)
-        if cause != '__atomic__':
-            self.concludeDict[(cause.relation, cause.node)] = (relation, node)
+        self.concludeDict[(cause.relation, cause.node)].append((relation, node))
 
-            ckey, crelation, cnode = cause
-            if ckey not in self.symbolDict:
-                self.add(ckey, crelation, cnode)
+        ckey, crelation, cnode = cause
+        if crelation not in self.symbolDict[ckey]:
+            self.add(ckey, crelation, cnode)
 
     def add(self, key, relation, node, cause='__atomic__', causes=None):
         self.symbolDict[key][relation].add(node)
@@ -81,15 +74,21 @@ class SymbolNet():
         return self.causeDict[clause.relation, clause.node]
 
     def trace_reasons(self, clause):
-        print('Tracing reasons for {}'.format(clause))
-        seen = OrderedSet()
+        seen = OrderedSet([clause])
         reasons = self.find_reasons(clause)
+        pprint(reasons)
         while '__atomic__' not in seen:
             if len(reasons) == 0:
                 break
+            queue = []
             for reason in reasons:
                 seen.add(reason)
-                reasons = self.find_reasons(reason)
+                subreasons = self.find_reasons(reason)
+                if subreasons:
+                    print('Reasons for {}:'.format(reason))
+                    pprint(subreasons)
+                queue += subreasons
+            reasons = queue
         return seen
 
     def _conclude(self, key):
@@ -97,8 +96,9 @@ class SymbolNet():
         for relation, nodes in self.symbolDict[key].items():
             for node in nodes:
                 if (relation, node) in self.concludeDict:
-                    concludedRelation, concludedNode = self.concludeDict[(relation, node)]
-                    queue.append((key, concludedRelation, concludedNode, Clause(key, relation, node)))
+                    concludePairs = self.concludeDict[(relation, node)]
+                    for cr, cn in concludePairs:
+                        queue.append((key, cr, cn, Clause(key, relation, node)))
         for args in queue:
             self.add(*args)
 
@@ -114,5 +114,27 @@ class SymbolNet():
                 causes.append(Clause(a, relation, node))
         self.add(a, 'supersedes', b, causes=causes)
         print('Proof for {} superseding {}:'.format(a, b))
-        print(self.trace_reasons(Clause(a, 'supersedes', b)))
+        self.trace_reasons(Clause(a, 'supersedes', b))
+
+    def likely(self, key, endrelation, endnode):
+        self._conclude(key)
+        reasonDict = defaultdict(set)
+        for relation, nodes in self.symbolDict[key].items():
+            for node in nodes:
+                close = self.find_that(relation, node)
+                for item in close:
+                    if item != key:
+                        reasonDict[item].add((relation, node))
+        for similarity, reasons in reasonDict.items():
+            print('A {} is similar to a {} because they share:'.format(key, similarity))
+            for reason in reasons:
+                print('    {}'.format(reason))
+            close = self.find_that(endrelation, endnode)
+            for item in close:
+                if item == similarity:
+                    print('Because a {} is similar to a {}, a {} likely:'.format(key, similarity, key))
+                    print('Likelihood based on {} similarities'.format(len(reasons)))
+                    print(endrelation, endnode)
+
+
 
