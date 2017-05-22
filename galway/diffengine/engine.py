@@ -1,16 +1,14 @@
-from ..search   import branch_and_bound, astar
-from ..util     import timedblock, timeout, sign
+from ..util   import timedblock, timeout, sign
+from ..search.methods import *
 
-from .diff_search import diff_search, alt_astar
-from .mu          import mu
-from .logic       import logic
-from .problem     import Problem
-from .system      import System
+from .systems     import logic
+from .theoremnode import TheoremNode
 from .            import heuristics
 
-from .compare_heuristics import compare_heuristics
-
 from pprint      import pprint
+from random      import choice
+from collections import OrderedDict
+from functools   import partial
 
 def produce_theorems(start, branches, depth):
     theorems = {start}
@@ -28,13 +26,16 @@ def produce_theorems(start, branches, depth):
             to_show.add(t)
     pprint(to_show)
 
+def create_random_proof(start, branches, depth):
+    last = start
+    for i in range(depth):
+        last = choice(list(branches(last)))
+    return last 
+
 def demo():
-    compare_heuristics()
-    print('Difference engine demonstration:')
-    p = Problem('R.(~P⊃Q)', '(QvP).R', logic)
-    #v = heuristics.alt_theorem_dist
-    v = heuristics.hamming_dist
-    with timedblock('proof'):
-        result = alt_astar(logic.branches, p.start, p.goal, distance=v)
+    start = TheoremNode('R.(~P⊃Q)')
+    end   = TheoremNode('(QvP).R')
+    with timedblock('proof', maxTime=1):
+        result = logic.prove(start, end, heuristics.hamming_len_dist)
     for i, step in enumerate(result):
         print('{:>5}: {}'.format(i + 1, step))

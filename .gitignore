@@ -92,3 +92,8 @@ ENV/
 *.log
 *.pdf
 *.png
+
+*.cache
+
+# Workspace stuff (for now)
+galway/lispmeat

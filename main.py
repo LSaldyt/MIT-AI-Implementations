@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from galway import *
 
-diff_demo()
+#memorization_demo()
+#diff_demo()
 #search_demo()
-#symstore_demo()
+symnet_demo()
