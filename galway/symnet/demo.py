@@ -59,7 +59,15 @@ def cup():
     net.likely('cup', 'hasa', 'concavity')
     net.likely('mystery-object', 'is', 'heavy')
 
+def syllogism():
+    net = SymbolNet()
+    net.add('man', 'is', 'mortal')
+    net.add('Socrates', '__isa__', 'man')
+    net.likely('Socrates', 'is', 'mortal')
+    print(net)
+
 def demo():
     #description_matching()
     #macbeth()
     cup()
+    syllogism()

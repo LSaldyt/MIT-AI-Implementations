@@ -97,6 +97,13 @@ class SymbolNet():
         return seen
 
     def _conclude(self, key):
+        inherits = []
+        for relation, nodes in self.symbolDict[key].items():
+            if relation == '__isa__':
+                for node in nodes:
+                    inherits.append(self.symbolDict[node])
+        for inherit in inherits:
+            self.symbolDict[key].update(self.symbolDict[node])
         queue = []
         for relation, nodes in self.symbolDict[key].items():
             for node in nodes:
@@ -117,9 +124,9 @@ class SymbolNet():
                        node not in aRelations[relation]:
                     print('{} does not supersede {}'.format(a, b))
                 causes.append(Clause(a, relation, node))
-        self.add(a, 'supersedes', b, causes=causes)
+        self.add(a, '__isa__', b, causes=causes)
         print('Proof for {} superseding {}:'.format(a, b))
-        self.trace_reasons(Clause(a, 'supersedes', b))
+        self.trace_reasons(Clause(a, '__isa__', b))
 
     def likely(self, key, endrelation, endnode):
         self._conclude(key)
@@ -133,10 +140,10 @@ class SymbolNet():
                         reasonDict[item].add((relation, node))
         close = self.find_that(endrelation, endnode)
         for similarity, reasons in reasonDict.items():
-            supersedes = self.query(Clause(similarity, 'supersedes', key))
+            __isa__ = self.query(Clause(similarity, '__isa__', key))
             if similarity in close:
-                if supersedes:
-                    print('Because {} supersedes {}, it is certain that:'.format(key, similarity))
+                if __isa__:
+                    print('Because {} __isa__ {}, it is certain that:'.format(key, similarity))
                     print('{} {} {}'.format(key, endrelation, endnode))
                 else:
                     print('Because a {} is similar to a {}, a {} likely:'.format(key, similarity, key))
