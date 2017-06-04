@@ -66,8 +66,17 @@ def syllogism():
     net.likely('Socrates', 'is', 'mortal')
     print(net)
 
+def analogy():
+    net = SymbolNet()
+    net.add('cup', 'holds', 'liquid')
+    net.add('briefcase', 'holds', 'paper')
+    # A cup is to liquid as a briefcase is to paper?
+    # Weak, but A -> B as C -> D, right?
+    net.analogize('cup', 'liquid', 'briefcase') # Cup is to liquid as briefcase is to _?
+
 def demo():
     #description_matching()
     #macbeth()
-    cup()
-    syllogism()
+    #cup()
+    #syllogism()
+    analogy()

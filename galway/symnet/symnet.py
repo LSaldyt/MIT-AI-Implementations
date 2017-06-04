@@ -25,7 +25,9 @@ class SymbolNet():
         self.symbolDict   = defaultdict(RelationDict)
         self.causeDict    = defaultdict(list)
         self.concludeDict = defaultdict(list)
-        self.relations    = defaultdict(set)
+        self.relationDict = defaultdict(list)
+        self.relations    = defaultdict(list)
+        self.reverseSymbolDict    = defaultdict(set)
         self.relationTypes = set()
 
     def __str__(self):
@@ -42,7 +44,7 @@ class SymbolNet():
 
     def add(self, key, relation, node, cause='__atomic__', causes=None):
         self.symbolDict[key][relation].add(node)
-        self.relations[(relation, node)].add(key)
+        self.reverseSymbolDict[(relation, node)].add(key)
         self.relationTypes.add(relation)
         if causes is None:
             causes = []
@@ -51,13 +53,16 @@ class SymbolNet():
         for c in causes:
             self._add_cause(key, relation, node, c)
 
+        self.relations[relation].append((key, node))
+        self.relationDict[(key, node)] = relation
+
     def query(self, clause):
         return clause.name in self.symbolDict and\
                clause.relation in self.symbolDict[clause.name] and\
                clause.node in self.symbolDict[clause.name][clause.relation]
 
     def find_that(self, relation, node):
-        return self.relations[(relation, node)]
+        return self.reverseSymbolDict[(relation, node)]
 
     def find_close(self, relationPairs):
         counter = Counter()
@@ -152,5 +157,12 @@ class SymbolNet():
                     for reason in reasons:
                         print('        {}'.format(reason))
 
-
+    def analogize(self, a, b, c):
+        # A is to B as C is to _?
+        print(self.relations)
+        relation = self.relationDict[(a, b)]
+        print(relation)
+        for x, y in self.relations[relation]:
+            if x == c:
+                print('{} {} {}'.format(c, relation, y))
 
