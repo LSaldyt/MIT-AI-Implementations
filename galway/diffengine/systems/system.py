@@ -1,5 +1,5 @@
 from .transform import build_transformers
-from .subterms  import build_subterm_function
+from ...util.subterms  import build_subterm_function
 from .path      import Path
 
 from ...search.methods import *

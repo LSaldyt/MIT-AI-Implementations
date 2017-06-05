@@ -54,7 +54,7 @@ class SymbolNet():
             self._add_cause(key, relation, node, c)
 
         self.relations[relation].append((key, node))
-        self.relationDict[(key, node)] = relation
+        self.relationDict[(key, node)].append(relation)
 
     def query(self, clause):
         return clause.name in self.symbolDict and\
@@ -101,7 +101,7 @@ class SymbolNet():
             reasons = queue
         return seen
 
-    def _conclude(self, key):
+    def _inherit(self, key):
         inherits = []
         for relation, nodes in self.symbolDict[key].items():
             if relation == '__isa__':
@@ -109,6 +109,9 @@ class SymbolNet():
                     inherits.append(self.symbolDict[node])
         for inherit in inherits:
             self.symbolDict[key].update(self.symbolDict[node])
+
+    def _conclude(self, key):
+        self._inherit(key)
         queue = []
         for relation, nodes in self.symbolDict[key].items():
             for node in nodes:
@@ -158,11 +161,12 @@ class SymbolNet():
                         print('        {}'.format(reason))
 
     def analogize(self, a, b, c):
+        self._conclude(a)
+        self._conclude(c)
         # A is to B as C is to _?
-        print(self.relations)
-        relation = self.relationDict[(a, b)]
-        print(relation)
-        for x, y in self.relations[relation]:
-            if x == c:
-                print('{} {} {}'.format(c, relation, y))
+        for relation in self.relationDict[(a, b)]:
+            for x, y in self.relations[relation]:
+                if x == c:
+                    print('{} is to {} as {} is to {} ({})'.format(
+                        x, y, a, b, relation))
 

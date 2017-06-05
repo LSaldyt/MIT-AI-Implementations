@@ -1,4 +1,5 @@
 from .symnet import SymbolNet, Clause
+from .interface import read_natural_language
 
 def description_matching():
     net = SymbolNet()
@@ -37,8 +38,10 @@ def cup():
     net.add('brick', 'is', 'heavy')
     net.add('glass', 'enables', 'drinking', causes=[Clause('glass', 'hasa', 'handle'), Clause('glass', 'carries', 'liquid')])
     net.add('glass', 'is', 'pretty')
+    net.add('glass', 'madeof', 'glass')
     net.add('briefcase', 'is', 'liftable', causes=[Clause('briefcase', 'has', 'handle'), Clause('briefcase', 'is', 'light')])
     net.add('briefcase', 'is', 'useful', cause=Clause('briefcase', 'holds', 'papers'))
+    net.add('briefcase', 'enables', 'organization', cause=Clause('briefcase', 'holds', 'papers'))
     net.add('bowl', 'carries', 'liquid', cause=Clause('bowl', 'has', 'concavity'))
     net.add('bowl', 'contains', 'cherry-soup')
 
@@ -59,6 +62,8 @@ def cup():
     net.likely('cup', 'hasa', 'concavity')
     net.likely('mystery-object', 'is', 'heavy')
 
+    net.analogize('cup', 'drinking', 'briefcase')
+
 def syllogism():
     net = SymbolNet()
     net.add('man', 'is', 'mortal')
@@ -74,9 +79,12 @@ def analogy():
     # Weak, but A -> B as C -> D, right?
     net.analogize('cup', 'liquid', 'briefcase') # Cup is to liquid as briefcase is to _?
 
+
 def demo():
     #description_matching()
     #macbeth()
     #cup()
     #syllogism()
-    analogy()
+    #analogy()
+    read_natural_language('data/syllogism.txt')
+
