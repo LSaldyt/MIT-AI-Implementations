@@ -160,9 +160,39 @@ class SymbolNet():
                     for reason in reasons:
                         print('        {}'.format(reason))
 
+    def similarities(self, a, b):
+        for relationa, nodea in self.symbolDict[a].items():
+            for relationb, nodeb in self.symbolDict[b].items():
+                if relationa == relationb and nodea == nodeb:
+                    yield (relationa, nodea)
+
+    def matched_relations(self, relations, b):
+        for rel in relations:
+            collect = self.symbolDict[b][rel]
+            for x, y in self.relations[rel]:
+                if x != b and y in collect:
+                    yield x
+
+    def find_relation(self, a, b):
+        print(self.relationDict[(a, b)])
+
     def analogize(self, a, b, c):
         self._conclude(a)
         self._conclude(c)
+
+        abRels = [elem[0] for elem in self.similarities(a, b)]
+        acRels = [elem[0] for elem in self.similarities(a, c)]
+        matched = set()
+        for elem in (self.matched_relations(acRels, b)):
+            matched.add(elem)
+        for elem in (self.matched_relations(abRels, c)):
+            matched.add(elem)
+        if len(matched) > 0:
+            print('{} is to {} as {} is to {} ({})'.format(
+                a, b, c, list(matched)[0], abRels + acRels))
+
+        self.find_relation(a, b)
+
         # A is to B as C is to _?
         for relation in self.relationDict[(a, b)]:
             for x, y in self.relations[relation]:

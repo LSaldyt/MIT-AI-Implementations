@@ -79,12 +79,32 @@ def analogy():
     # Weak, but A -> B as C -> D, right?
     net.analogize('cup', 'liquid', 'briefcase') # Cup is to liquid as briefcase is to _?
 
+def instance_analogy():
+    net = SymbolNet()
+    net.add('cup-a', 'is', 'small')
+    net.add('cup-a', 'isa', 'cup')
+    net.add('cup-b', 'is', 'big')
+    net.add('cup-b', 'isa', 'cup')
+    net.add('bowl-a', 'is', 'small')
+    net.add('bowl-a', 'isa', 'bowl')
+    net.add('bowl-b', 'is', 'big')
+    net.add('bowl-b', 'isa', 'bowl')
+    net.analogize('cup-a', 'bowl-a', 'cup-b')
+
+def high_analogy():
+    net = SymbolNet()
+    net.add('granny-smith', 'isa', 'apple')
+    net.add('apple', 'isa', 'fruit')
+    net.add('husky', 'isa', 'dog')
+    net.add('dog', 'isa', 'mammal')
+    net.analogize('granny-smith', 'apple', 'husky') # mammal
 
 def demo():
     #description_matching()
     #macbeth()
     #cup()
     #syllogism()
-    #analogy()
-    read_natural_language('data/syllogism.txt')
+    analogy()
+    #read_natural_language('data/syllogism.txt')
+    instance_analogy()
 
