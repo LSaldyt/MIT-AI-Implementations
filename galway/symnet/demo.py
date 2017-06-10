@@ -67,7 +67,7 @@ def cup():
 def syllogism():
     net = SymbolNet()
     net.add('man', 'is', 'mortal')
-    net.add('Socrates', '__isa__', 'man')
+    net.add('Socrates', 'isa', 'man')
     net.likely('Socrates', 'is', 'mortal')
     print(net)
 
@@ -97,7 +97,9 @@ def high_analogy():
     net.add('apple', 'isa', 'fruit')
     net.add('husky', 'isa', 'dog')
     net.add('dog', 'isa', 'mammal')
-    net.analogize('granny-smith', 'apple', 'husky') # mammal
+    #net.analogize('granny-smith', 'apple', 'husky') # mammal
+    net.analogize('granny-smith', 'fruit', 'husky') # mammal
+    #print(net)
 
 def demo():
     #description_matching()
@@ -107,4 +109,5 @@ def demo():
     analogy()
     #read_natural_language('data/syllogism.txt')
     instance_analogy()
+    high_analogy()
 

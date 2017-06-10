@@ -104,11 +104,13 @@ class SymbolNet():
     def _inherit(self, key):
         inherits = []
         for relation, nodes in self.symbolDict[key].items():
-            if relation == '__isa__':
+            if relation == 'isa':
                 for node in nodes:
                     inherits.append(self.symbolDict[node])
         for inherit in inherits:
-            self.symbolDict[key].update(self.symbolDict[node])
+            for relation, nodes in inherit.items():
+                for node in nodes: 
+                    self.add(key, relation, node)
 
     def _conclude(self, key):
         self._inherit(key)
@@ -132,9 +134,9 @@ class SymbolNet():
                        node not in aRelations[relation]:
                     print('{} does not supersede {}'.format(a, b))
                 causes.append(Clause(a, relation, node))
-        self.add(a, '__isa__', b, causes=causes)
+        self.add(a, 'isa', b, causes=causes)
         print('Proof for {} superseding {}:'.format(a, b))
-        self.trace_reasons(Clause(a, '__isa__', b))
+        self.trace_reasons(Clause(a, 'isa', b))
 
     def likely(self, key, endrelation, endnode):
         self._conclude(key)
@@ -148,10 +150,10 @@ class SymbolNet():
                         reasonDict[item].add((relation, node))
         close = self.find_that(endrelation, endnode)
         for similarity, reasons in reasonDict.items():
-            __isa__ = self.query(Clause(similarity, '__isa__', key))
+            isa = self.query(Clause(similarity, 'isa', key))
             if similarity in close:
-                if __isa__:
-                    print('Because {} __isa__ {}, it is certain that:'.format(key, similarity))
+                if isa:
+                    print('Because {} isa {}, it is certain that:'.format(key, similarity))
                     print('{} {} {}'.format(key, endrelation, endnode))
                 else:
                     print('Because a {} is similar to a {}, a {} likely:'.format(key, similarity, key))
@@ -173,9 +175,6 @@ class SymbolNet():
                 if x != b and y in collect:
                     yield x
 
-    def find_relation(self, a, b):
-        print(self.relationDict[(a, b)])
-
     def analogize(self, a, b, c):
         self._conclude(a)
         self._conclude(c)
@@ -190,8 +189,6 @@ class SymbolNet():
         if len(matched) > 0:
             print('{} is to {} as {} is to {} ({})'.format(
                 a, b, c, list(matched)[0], abRels + acRels))
-
-        self.find_relation(a, b)
 
         # A is to B as C is to _?
         for relation in self.relationDict[(a, b)]:
