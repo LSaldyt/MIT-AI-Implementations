@@ -77,7 +77,7 @@ def analogy():
     net.add('briefcase', 'holds', 'paper')
     # A cup is to liquid as a briefcase is to paper?
     # Weak, but A -> B as C -> D, right?
-    net.analogize('cup', 'liquid', 'briefcase') # Cup is to liquid as briefcase is to _?
+    net.relational_analogy('cup', 'liquid', 'briefcase') # Cup is to liquid as briefcase is to _?
 
 def instance_analogy():
     net = SymbolNet()
@@ -97,17 +97,36 @@ def high_analogy():
     net.add('apple', 'isa', 'fruit')
     net.add('husky', 'isa', 'dog')
     net.add('dog', 'isa', 'mammal')
-    #net.analogize('granny-smith', 'apple', 'husky') # mammal
     net.analogize('granny-smith', 'fruit', 'husky') # mammal
-    #print(net)
+
+def push_pull():
+    '''
+    Why can you pull something with a string, but not push it?
+    english: the string would crumple up, and be unable to transfer force
+             when pulling, the string is taut, which allows force to be transferred
+
+    movement requires transfer of force 
+    pushing is a type of movement
+    pulling is a type of movement
+    (pushing/pulling requires transfer of force)
+    strings can only transfer force when taut
+    strings are not taut when pushing
+    '''
+    net = SymbolNet()
+    net.add('movement', 'requires', 'force-transfer')
+    net.add('push', 'isa', 'movement')
+    net.add('pull', 'isa', 'movement')
+    #net.add('string', 'has', 'force-transfer', '''Condition: When taut''')
+    #net.add('string', 'is', 'taut', '''Condition: when pulling''')
 
 def demo():
     #description_matching()
     #macbeth()
     #cup()
     #syllogism()
-    analogy()
     #read_natural_language('data/syllogism.txt')
+    #push_pull()
+    analogy()
     instance_analogy()
     high_analogy()
 
