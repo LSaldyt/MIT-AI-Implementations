@@ -1,7 +1,7 @@
 from pprint import pprint
 
 from .system   import System
-from .subterms import build_splitter, _strip_parens
+from ...util.subterms import build_splitter, _strip_parens
 
 from .. import logic_heuristics
 

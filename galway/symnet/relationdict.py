@@ -11,7 +11,10 @@ class RelationDict():
         return key in self.relations
 
     def __str__(self):
-        l = max(len(s) for s in self.relations.keys())
+        if len(self.relations.keys()) == 0:
+            l = 1
+        else:
+            l = max(len(s) for s in self.relations.keys())
         prettify = lambda kv : ('{:<' + str(l) + '} : {}').format(*kv)
         return '\n    '.join(map(prettify, self.relations.items()))
 
@@ -22,4 +25,7 @@ class RelationDict():
 
     def items(self):
         return self.relations.items()
+
+    def update(self, other):
+        self.relations.update(other.relations)
 

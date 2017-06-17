@@ -3,10 +3,21 @@ import string, re
 def build_splitter(terms):
     splitRegex = '(%s)' % ')|('.join(map(re.escape, terms))
     splitRegex = re.compile(splitRegex)
-    def splitter(term):
-        for item in re.split(splitRegex, term):
+    def splitter(line):
+        for item in re.split(splitRegex, line):
             if item is not None and item != '':
                 yield item
+    return splitter
+
+def alt_build_splitter(terms):
+    discard = set()
+    for term, keep in terms:
+        if not keep:
+            discard.add(term)
+    terms = [term for term, keep in terms]
+    inner_splitter = build_splitter(terms)
+    def splitter(line):
+        return (item for item in inner_splitter(line) if item not in discard)
     return splitter
 
 def _strip_parens(term):

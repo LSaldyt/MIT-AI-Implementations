@@ -25,7 +25,9 @@ class SymbolNet():
         self.symbolDict   = defaultdict(RelationDict)
         self.causeDict    = defaultdict(list)
         self.concludeDict = defaultdict(list)
-        self.relations    = defaultdict(set)
+        self.relationDict = defaultdict(list)
+        self.relations    = defaultdict(list)
+        self.reverseSymbolDict    = defaultdict(set)
         self.relationTypes = set()
 
     def __str__(self):
@@ -42,7 +44,7 @@ class SymbolNet():
 
     def add(self, key, relation, node, cause='__atomic__', causes=None):
         self.symbolDict[key][relation].add(node)
-        self.relations[(relation, node)].add(key)
+        self.reverseSymbolDict[(relation, node)].add(key)
         self.relationTypes.add(relation)
         if causes is None:
             causes = []
@@ -51,13 +53,16 @@ class SymbolNet():
         for c in causes:
             self._add_cause(key, relation, node, c)
 
+        self.relations[relation].append((key, node))
+        self.relationDict[(key, node)].append(relation)
+
     def query(self, clause):
         return clause.name in self.symbolDict and\
                clause.relation in self.symbolDict[clause.name] and\
                clause.node in self.symbolDict[clause.name][clause.relation]
 
     def find_that(self, relation, node):
-        return self.relations[(relation, node)]
+        return self.reverseSymbolDict[(relation, node)]
 
     def find_close(self, relationPairs):
         counter = Counter()
@@ -96,7 +101,19 @@ class SymbolNet():
             reasons = queue
         return seen
 
+    def _inherit(self, key):
+        inherits = []
+        for relation, nodes in self.symbolDict[key].items():
+            if relation == 'isa':
+                for node in nodes:
+                    inherits.append(self.symbolDict[node])
+        for inherit in inherits:
+            for relation, nodes in inherit.items():
+                for node in nodes: 
+                    self.add(key, relation, node)
+
     def _conclude(self, key):
+        self._inherit(key)
         queue = []
         for relation, nodes in self.symbolDict[key].items():
             for node in nodes:
@@ -117,9 +134,9 @@ class SymbolNet():
                        node not in aRelations[relation]:
                     print('{} does not supersede {}'.format(a, b))
                 causes.append(Clause(a, relation, node))
-        self.add(a, 'supersedes', b, causes=causes)
+        self.add(a, 'isa', b, causes=causes)
         print('Proof for {} superseding {}:'.format(a, b))
-        self.trace_reasons(Clause(a, 'supersedes', b))
+        self.trace_reasons(Clause(a, 'isa', b))
 
     def likely(self, key, endrelation, endnode):
         self._conclude(key)
@@ -133,10 +150,10 @@ class SymbolNet():
                         reasonDict[item].add((relation, node))
         close = self.find_that(endrelation, endnode)
         for similarity, reasons in reasonDict.items():
-            supersedes = self.query(Clause(similarity, 'supersedes', key))
+            isa = self.query(Clause(similarity, 'isa', key))
             if similarity in close:
-                if supersedes:
-                    print('Because {} supersedes {}, it is certain that:'.format(key, similarity))
+                if isa:
+                    print('Because {} isa {}, it is certain that:'.format(key, similarity))
                     print('{} {} {}'.format(key, endrelation, endnode))
                 else:
                     print('Because a {} is similar to a {}, a {} likely:'.format(key, similarity, key))
@@ -145,5 +162,38 @@ class SymbolNet():
                     for reason in reasons:
                         print('        {}'.format(reason))
 
+    def similarities(self, a, b):
+        for relationa, nodea in self.symbolDict[a].items():
+            for relationb, nodeb in self.symbolDict[b].items():
+                if relationa == relationb and nodea == nodeb:
+                    yield (relationa, nodea)
 
+    def matched_relations(self, relations, b):
+        for rel in relations:
+            collect = self.symbolDict[b][rel]
+            for x, y in self.relations[rel]:
+                if x != b and y in collect:
+                    yield x
+
+    def analogize(self, a, b, c):
+        self._conclude(a)
+        self._conclude(c)
+
+        abRels = [elem[0] for elem in self.similarities(a, b)]
+        acRels = [elem[0] for elem in self.similarities(a, c)]
+        matched = set()
+        for elem in (self.matched_relations(acRels, b)):
+            matched.add(elem)
+        for elem in (self.matched_relations(abRels, c)):
+            matched.add(elem)
+        if len(matched) > 0:
+            print('{} is to {} as {} is to {} ({})'.format(
+                a, b, c, list(matched)[0], abRels + acRels))
+
+        # A is to B as C is to _?
+        for relation in self.relationDict[(a, b)]:
+            for x, y in self.relations[relation]:
+                if x == c:
+                    print('{} is to {} as {} is to {} ({})'.format(
+                        x, y, a, b, relation))
 

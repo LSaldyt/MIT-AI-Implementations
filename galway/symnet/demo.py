@@ -1,4 +1,5 @@
 from .symnet import SymbolNet, Clause
+from .interface import read_natural_language
 
 def description_matching():
     net = SymbolNet()
@@ -37,8 +38,10 @@ def cup():
     net.add('brick', 'is', 'heavy')
     net.add('glass', 'enables', 'drinking', causes=[Clause('glass', 'hasa', 'handle'), Clause('glass', 'carries', 'liquid')])
     net.add('glass', 'is', 'pretty')
+    net.add('glass', 'madeof', 'glass')
     net.add('briefcase', 'is', 'liftable', causes=[Clause('briefcase', 'has', 'handle'), Clause('briefcase', 'is', 'light')])
     net.add('briefcase', 'is', 'useful', cause=Clause('briefcase', 'holds', 'papers'))
+    net.add('briefcase', 'enables', 'organization', cause=Clause('briefcase', 'holds', 'papers'))
     net.add('bowl', 'carries', 'liquid', cause=Clause('bowl', 'has', 'concavity'))
     net.add('bowl', 'contains', 'cherry-soup')
 
@@ -59,7 +62,71 @@ def cup():
     net.likely('cup', 'hasa', 'concavity')
     net.likely('mystery-object', 'is', 'heavy')
 
+    net.analogize('cup', 'drinking', 'briefcase')
+
+def syllogism():
+    net = SymbolNet()
+    net.add('man', 'is', 'mortal')
+    net.add('Socrates', 'isa', 'man')
+    net.likely('Socrates', 'is', 'mortal')
+    print(net)
+
+def analogy():
+    net = SymbolNet()
+    net.add('cup', 'holds', 'liquid')
+    net.add('briefcase', 'holds', 'paper')
+    # A cup is to liquid as a briefcase is to paper?
+    # Weak, but A -> B as C -> D, right?
+    net.relational_analogy('cup', 'liquid', 'briefcase') # Cup is to liquid as briefcase is to _?
+
+def instance_analogy():
+    net = SymbolNet()
+    net.add('cup-a', 'is', 'small')
+    net.add('cup-a', 'isa', 'cup')
+    net.add('cup-b', 'is', 'big')
+    net.add('cup-b', 'isa', 'cup')
+    net.add('bowl-a', 'is', 'small')
+    net.add('bowl-a', 'isa', 'bowl')
+    net.add('bowl-b', 'is', 'big')
+    net.add('bowl-b', 'isa', 'bowl')
+    net.analogize('cup-a', 'bowl-a', 'cup-b')
+
+def high_analogy():
+    net = SymbolNet()
+    net.add('granny-smith', 'isa', 'apple')
+    net.add('apple', 'isa', 'fruit')
+    net.add('husky', 'isa', 'dog')
+    net.add('dog', 'isa', 'mammal')
+    net.analogize('granny-smith', 'fruit', 'husky') # mammal
+
+def push_pull():
+    '''
+    Why can you pull something with a string, but not push it?
+    english: the string would crumple up, and be unable to transfer force
+             when pulling, the string is taut, which allows force to be transferred
+
+    movement requires transfer of force 
+    pushing is a type of movement
+    pulling is a type of movement
+    (pushing/pulling requires transfer of force)
+    strings can only transfer force when taut
+    strings are not taut when pushing
+    '''
+    net = SymbolNet()
+    net.add('movement', 'requires', 'force-transfer')
+    net.add('push', 'isa', 'movement')
+    net.add('pull', 'isa', 'movement')
+    #net.add('string', 'has', 'force-transfer', '''Condition: When taut''')
+    #net.add('string', 'is', 'taut', '''Condition: when pulling''')
+
 def demo():
     #description_matching()
     #macbeth()
-    cup()
+    #cup()
+    #syllogism()
+    #read_natural_language('data/syllogism.txt')
+    #push_pull()
+    analogy()
+    instance_analogy()
+    high_analogy()
+

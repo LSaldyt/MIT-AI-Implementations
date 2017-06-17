@@ -1,0 +1,3 @@
+Socrates __isa__ man
+man is mortal
+Socrates is mortal?
